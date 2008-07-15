@@ -1,0 +1,347 @@
+NAME
+    DateTime::Format::CLDR - Parse and format CLDR time patterns
+
+SYNOPSIS
+        use DateTime::Format::CLDR;
+        
+    my $cldr = new DateTime::Format::CLDR(
+            pattern     => '%T',
+            locale      => 'de_AT',
+            time_zone   => 'Europe/Vienna',
+        );
+        
+    my $dt = $cldr->parse_datetime('23:16:42');
+        
+    # Get pattern from selected locale
+        my $cldr = new DateTime::Format::CLDR(
+            locale      => 'de_AT',
+        );
+        
+    my $dt = $cldr->parse_datetime('23:16:42');
+
+DESCRIPTION
+    This module provides a parser (and also a formater) for datetime strings
+    using patterns as defined by the Unicode CLDR Project (Common Locale
+    Data Repository). <http://unicode.org/cldr/>.
+
+METHODS
+  Constructor
+   new
+     DateTime::Format::CLDR->new(%PARAMS);
+
+    The following parameters are used by DateTime::Format::CLDR:
+
+    *   locale
+
+        Locale.
+
+    *   pattern (optional)
+
+        CLDR pattern. See "CLDR Patterns" in DateTime for details. If you
+        don't provide a pattern the "date_format_medium" pattern from
+        DateTime::Local for the selected locale will be used.
+
+    *   time_zone (optional)
+
+        Timezone that should be used. The time_zone parameter can be either
+        a scalar or a "DateTime::TimeZone" object. A string will simply be
+        passed to the "DateTime::TimeZone-"new> method as its "name"
+        parameter.
+
+  Accessors
+   pattern
+    Get/set pattern.
+
+   time_zone
+    Get/set time_zone. Returns a "DateTime::TimeZone" object.
+
+   locale
+    Get/set locale. Returns a "DateTime::Locale" object.
+
+  Public Methods
+   parse_datetime
+     my $datetime = $cldr->parse_datetime($string);
+
+    Parses a string and returns a "DateTime" object on success. If the
+    string cannot be parsed with the given pattern "undef" is returned.
+
+   format_datetime
+     my $string = $cldr->format_datetime($datetime);
+
+    Formats a "DateTime" object using the set time_zone, locale and pattern.
+
+CLDR PATTERNS
+    See "CLDR Patterns" in DateTime.
+
+    CLDR provides the following pattenrs:
+
+    *   G{1,3}
+
+        The abbreviated era (BC, AD).
+
+    *   GGGG
+
+        The wide era (Before Christ, Anno Domini).
+
+    *   GGGGG
+
+        The narrow era, if it exists (and it mostly doesn't).
+
+    *   y and y{3,}
+
+        The year, zero-prefixed as needed.
+
+    *   yy
+
+        This is a special case. It always produces a two-digit year, so
+        "1976" becomes "76".
+
+    *   Y{1,}
+
+        The week of the year, from "$dt->week_year()".
+
+    *   u{1,}
+
+        Same as "y" except that "uu" is not a special case.
+
+    *   Q{1,2}
+
+        The quarter as a number (1..4).
+
+    *   QQQ
+
+        The abbreviated format form for the quarter.
+
+    *   QQQQ
+
+        The wide format form for the quarter.
+
+    *   q{1,2}
+
+        The quarter as a number (1..4).
+
+    *   qqq
+
+        The abbreviated stand-alone form for the quarter.
+
+    *   qqqq
+
+        The wide stand-alone form for the quarter.
+
+    *   M{1,2}
+
+        The numerical month.
+
+    *   MMM
+
+        The abbreviated format form for the month.
+
+    *   MMMM
+
+        The wide format form for the month.
+
+    *   MMMMM
+
+        The narrow format form for the month.
+
+    *   L{1,2}
+
+        The numerical month.
+
+    *   LLL
+
+        The abbreviated stand-alone form for the month.
+
+    *   LLLL
+
+        The wide stand-alone form for the month.
+
+    *   LLLLL
+
+        The narrow stand-alone form for the month.
+
+    *   w{1,2}
+
+        The week of the year, from "$dt->week_number()".
+
+    *   W
+
+        The week of the month, from "$dt->week_of_month()".
+
+    *   d{1,2}
+
+        The numeric day of of the month.
+
+    *   D{1,3}
+
+        The numeric day of of the year.
+
+    *   F
+
+        The day of the week in the month, from "$dt->weekday_of_month()".
+
+    *   g{1,}
+
+        The modified Julian day, from "$dt->mjd()".
+
+    *   E{1,3}
+
+        The abbreviated format form for the day of the week.
+
+    *   EEEE
+
+        The wide format form for the day of the week.
+
+    *   EEEEE
+
+        The narrow format form for the day of the week.
+
+    *   e{1,2}
+
+        The *local* day of the week, from 1 to 7. This number depends on
+        what day is considered the first day of the week, which varies by
+        locale. For example, in the US, Sunday is the first day of the week,
+        so this returns 2 for Monday.
+
+    *   eee
+
+        The abbreviated format form for the day of the week.
+
+    *   eeee
+
+        The wide format form for the day of the week.
+
+    *   eeeee
+
+        The narrow format form for the day of the week.
+
+    *   c
+
+        The numeric day of the week (not localized).
+
+    *   ccc
+
+        The abbreviated stand-alone form for the day of the week.
+
+    *   cccc
+
+        The wide stand-alone form for the day of the week.
+
+    *   ccccc
+
+        The narrow format form for the day of the week.
+
+    *   a
+
+        The localized form of AM or PM for the time.
+
+    *   h{1,2}
+
+        The hour from 1-12.
+
+    *   H{1,2}
+
+        The hour from 0-23.
+
+    *   K{1,2}
+
+        The hour from 0-11.
+
+    *   k{1,2}
+
+        The hour from 1-24.
+
+    *   j{1,2}
+
+        The hour, in 12 or 24 hour form, based on the preferred form for the
+        locale. In other words, this is equivalent to either "h{1,2}" or
+        "H{1,2}".
+
+    *   m{1,2}
+
+        The minute.
+
+    *   s{1,2}
+
+        The second.
+
+    *   S{1,}
+
+        The fractional portion of the seconds, rounded based on the length
+        of the specifier. This returned *without* a leading decimal point,
+        but may have leading or trailing zeroes.
+
+    *   A{1,}
+
+        The millisecond of the day, based on the current time. In other
+        words, if it is 12:00:00.00, this returns 43200000.
+
+    *   z{1,3}
+
+        The time zone short name.
+
+    *   zzzz
+
+        The time zone long name.
+
+    *   Z{1,3}
+
+        The time zone short name and the offset as one string, so something
+        like "CDT-0500".
+
+    *   ZZZZ
+
+        The time zone long name.
+
+    *   v{1,3}
+
+        The time zone short name.
+
+    *   vvvv
+
+        The time zone long name.
+
+    *   V{1,3}
+
+        The time zone short name.
+
+    *   VVVV
+
+        The time zone long name.
+
+SUPPORT
+    Please report any bugs or feature requests to
+    "datetime-format-cldr@rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/Public/Bug/Report.html?Queue=DateTime::Format::CLDR>
+    . I will be notified and then you'll automatically be notified of the
+    progress on your report as I make changes.
+
+AUTHOR
+        Maroš Kollár
+        CPAN ID: MAROS
+        maros [at] k-1.com
+        
+    L<http://www.revdev.at>
+
+ACKNOWLEDGEMENTS
+    This module was written for Revdev <http://www.revdev.at>, a nice litte
+    software company I run with Koki and Domm
+    (<http://search.cpan.org/~domm/>).
+
+COPYRIGHT
+    DateTime::Format::CLDR is Copyright (c) 2008 Maroš Kollár -
+    <http://www.revdev.at>
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+    The full text of the license can be found in the LICENSE file included
+    with this module.
+
+SEE ALSO
+    datetime@perl.org mailing list
+
+    <http://datetime.perl.org/>
+
+    DateTime, DateTime::Locale, DateTime::TimeZone
+
