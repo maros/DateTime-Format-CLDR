@@ -2,3 +2,8 @@ Revision history for Perl module DateTime::Format::CLDR
 
 1.00 Tue Jul 15 2008
     - original version
+    
+1.01 Wed Jul 16 2008
+    - Fixed some time zone issues
+    - Added README file
+    - Extended documentation
