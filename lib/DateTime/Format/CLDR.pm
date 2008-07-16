@@ -28,7 +28,8 @@ our %PARTS = (
     minute      => qr/([1-5]?\d)/o,
     second      => qr/(6[01]|[1-5]?\d)/o,
     quarter     => qr/([1-4])/o,
-    week        => qr/(5[0-3]|[1-4]\d|[1-9])/o,
+    week_year   => qr/(5[0-3]|[1-4]\d|[1-9])/o,
+    week_month  => qr/\d/o,
     timezone    => qr/[+-](1[0-4]|0\d)(00|15|30|45)/o,
     number      => qr/\d+/o,
     timezone2   => qr/([A-Z1-9a-z])([+-](1[0-4]|0\d)(00|15|30|45))/o,
@@ -165,7 +166,8 @@ our %PARSER = (
     L3      => 'month_stand_alone_abbreviated',
     L4      => 'month_stand_alone_wide',
     L5      => 'month_stand_alone_narrow',
-    w1      => $PARTS{week},
+    w1      => $PARTS{week_year},
+    W1      => $PARTS{week_month},
     d1      => $PARTS{day_month},
     D1      => $PARTS{day_year},
     E1      => 'day_format_abbreviated',
@@ -422,7 +424,9 @@ sub parse_datetime {
             } elsif ($command eq 'M' || $command eq 'L') {
                 $datetime{month} = $capture; 
             } elsif ($command eq 'w') {
-                $datetime{week} = $capture;
+                $datetime_check{week_number} = $capture;
+            } elsif ($command eq 'W') {
+                $datetime_check{week_of_month} = $capture;
             } elsif ($command eq 'd') {
                 $datetime{day} = $capture;
             } elsif ($command eq 'D') {
@@ -601,13 +605,19 @@ CLDR provides the following pattenrs:
 
 The abbreviated era (BC, AD).
 
+Not used to construct a date.
+
 =item * GGGG
 
 The wide era (Before Christ, Anno Domini).
 
+Not used to construct a date.
+
 =item * GGGGG
 
 The narrow era, if it exists (and it mostly doesn't).
+
+Not used to construct a date.
 
 =item * y and y{3,}
 
@@ -686,9 +696,13 @@ The narrow stand-alone form for the month.
 
 The week of the year, from C<< $dt->week_number() >>.
 
+Not used to construct a date.
+
 =item * W
 
 The week of the month, from C<< $dt->week_of_month() >>.
+
+Not used to construct a date.
 
 =item * d{1,2}
 
@@ -697,6 +711,8 @@ The numeric day of of the month.
 =item * D{1,3}
 
 The numeric day of of the year.
+
+Not used to construct a date.
 
 =item * F
 
@@ -789,14 +805,11 @@ The second.
 
 =item * S{1,}
 
-The fractional portion of the seconds, rounded based on the length of
-the specifier. This returned I<without> a leading decimal point, but
-may have leading or trailing zeroes.
+Not supported by DateTime::Format::CLDR
 
 =item * A{1,}
 
-The millisecond of the day, based on the current time. In other words,
-if it is 12:00:00.00, this returns 43200000.
+Not supported by DateTime::Format::CLDR
 
 =item * z{1,3}
 
