@@ -5,6 +5,7 @@
 use strict;
 use warnings;
 no warnings qw(once);
+use utf8;
 
 use Test::More tests => 101017;
 
@@ -15,8 +16,7 @@ use DateTime::TimeZone;
 use_ok( 'DateTime::Format::CLDR' );
 
 #my $time_zone = DateTime::TimeZone->new( name => 'Z' );
-my $time_zone = '+0000';
-
+my $time_zone = DateTime::TimeZone->new(name => 'Europe/Vienna');
 
 warn('Running extended tests: This may take a couple of minutes');
 
@@ -101,18 +101,17 @@ sub compare {
     my $dtc = $dtf->parse_datetime($dts);
     
     unless($dtc && $dtc->isa('DateTime')) {
-        fail('Not a DateTime');
+        fail('Not a DateTime: '.$dts);
         return;
     }
     
     unless ( DateTime->compare_ignore_floating( $dtc, $dt ) == 0) {
         #.'::'.$dtc->nanosecond.'::'.$dtc->time_zone.'::'.$dtc->locale.
-        fail(
-            $dtf->{pattern}.'||'.
-            $dts.'||'.
-            $dt.'||'.
-            $dtc.'||'.
-            DateTime->compare_ignore_floating( $dtc, $dt ));  
+        fail('Pattern: "'.$dtf->{pattern}.'"; '.
+            'String: "'.$dts.'"; '.
+            'Original: '.$dt.$dt->time_zone.'; '.
+            'Computed: '.$dtc.$dtc->time_zone.'; '.
+            'Locale: '.$dt->locale->id);  
     }  else {
         ok('Successfully compared datetime');
     }

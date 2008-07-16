@@ -15,21 +15,23 @@ use Params::Validate qw( validate SCALAR BOOLEAN OBJECT CODEREF );
 our $VERSION = '1.01';
 
 our %PARTS = (
-    year_long   => qr/(\d{4})/,
-    year_short  => qr/(\d{1,2})/,
-    day_month   => qr/(3[01]|[12]\d|[1-9])/,
-    day_year    => qr/([1-3]\d\d|[1-9]\d|[1-9])/,
-    day_week    => qr/[1-7]/,
-    month       => qr/(1[0-2]|[1-9])/,
-    hour_23     => qr/(2[0-4]|1\d|\d)/,
-    hour_24     => qr/(2[0-3]|1?\d)/,
-    hour_12     => qr/(1[0-2]|[1-9])/,
-    hour_11     => qr/(1[01]|\d)/,
-    minute      => qr/([1-5]?\d)/,
-    second      => qr/(6[01]|[1-5]?\d)/,
-    quarter     => qr/([1-4])/,
-    week        => qr/(5[0-3]|[1-4]\d|[1-9])/,
-    timezone    => qr/(?:1[0-4]|0\d)(?:00|15|30|45)/,
+    year_long   => qr/(\d{4})/o,
+    year_short  => qr/(\d{1,2})/o,
+    day_month   => qr/(3[01]|[12]\d|[1-9])/o,
+    day_year    => qr/([1-3]\d\d|[1-9]\d|[1-9])/o,
+    day_week    => qr/[1-7]/o,
+    month       => qr/(1[0-2]|[1-9])/o,
+    hour_23     => qr/(2[0-4]|1\d|\d)/o,
+    hour_24     => qr/(2[0-3]|1?\d)/o,
+    hour_12     => qr/(1[0-2]|[1-9])/o,
+    hour_11     => qr/(1[01]|\d)/o,
+    minute      => qr/([1-5]?\d)/o,
+    second      => qr/(6[01]|[1-5]?\d)/o,
+    quarter     => qr/([1-4])/o,
+    week        => qr/(5[0-3]|[1-4]\d|[1-9])/o,
+    timezone    => qr/[+-](1[0-4]|0\d)(00|15|30|45)/o,
+    number      => qr/\d+/o,
+    timezone2   => qr/([A-Z1-9a-z])([+-](1[0-4]|0\d)(00|15|30|45))/o,
 );
 
 our %ZONEMAP = (
@@ -114,7 +116,7 @@ our %ZONEMAP = (
    'SWT' => '+0100',          'T' => '-0700',        'TFT' => '+0500',
    'THA' => '+0700',       'THAT' => '-1000',        'TJT' => '+0500',
    'TKT' => '-1000',        'TMT' => '+0500',        'TOT' => '+1300',
-  'TRUT' => '+1000',        'TST' => '+0300',       'TUC ' => '+0000',
+  'TRUT' => '+1000',        'TST' => '+0300',        'TUC' => '+0000',
    'TVT' => '+1200',          'U' => '-0800',      'ULAST' => '+0900',
   'ULAT' => '+0800',       'USZ1' => '+0200',      'USZ1S' => '+0300',
   'USZ3' => '+0400',      'USZ3S' => '+0500',       'USZ4' => '+0500',
@@ -185,7 +187,7 @@ our %PARSER = (
     s1      => $PARTS{second},
     s1      => $PARTS{second},
     Z1      => $PARTS{timezone},
-    
+    Z4      => $PARTS{timezone2},
     z1      => [ keys %ZONEMAP ],
     z4      => [ DateTime::TimeZone->all_names ],
     v1      => [ keys %ZONEMAP ],
@@ -319,7 +321,6 @@ sub time_zone {
             $self->{time_zone} = DateTime::TimeZone->new( name => $time_zone )
                 or croak("Could not create timezone from $time_zone");
         }  
-        undef $self->{_built_pattern};
     }
     
     return $self->{time_zone};
@@ -442,7 +443,10 @@ sub parse_datetime {
                 $datetime{minute} = $capture;
             } elsif ($command eq 's') {
                 $datetime{second} = $capture;
-            } elsif ($command eq 'T') {
+            } elsif ($command eq 'Z') {
+                if ($index >= 4) {
+                    $capture = $3;
+                }
                 $datetime{time_zone} = DateTime::TimeZone->new(name => $capture);
             } elsif (($command eq 'z' || $command eq 'v' || $command eq 'V') && $index == 1) {
                 if (! defined $ZONEMAP{$capture} 
@@ -573,8 +577,14 @@ sub _build_pattern {
     
     return $self->{_built_pattern};
 }
-
-
+#
+#sub _build_timezone {
+#    my $regexp =  $PARTS{timezone}.
+#        '('.(join '|',map {
+#        "\Q".$_."\E";
+#        } sort { length $b <=> length $a } keys %ZONEMAP).')';
+#    return qr/$regexp/o;
+#}
 
 
 1;
