@@ -9,10 +9,11 @@ all_from        'lib/DateTime/Format/CLDR.pm';
 perl_version    '5.008';
 
 # Specific dependencies
-requires        'DateTime'                  => '0.4304';
+requires        'DateTime'                  => '0.44';
 requires        'Params::Validate'          => 0;
 requires        'DateTime::TimeZone'        => 0;
-requires        'DateTime::Locale'          => '0.41';
+requires        'DateTime::Locale'          => '0.42';
+requires        'DateTime::Incomplete'      => 0;
 
 build_requires  'Exporter'                  => 0;
 build_requires  'Test::Pod'                 => 0;

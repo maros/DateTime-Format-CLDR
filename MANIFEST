@@ -19,3 +19,7 @@ t/003_podcoverage.t
 t/004_basic.t
 t/005_extended.t
 t/006_exceptions.t
+t/007_bug_rt41392.t
+t/008_bug_rt43381.t
+t/009_incomplete.t
+t/lib/testlib.pm
