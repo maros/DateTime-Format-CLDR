@@ -5,36 +5,38 @@ use strict;
 use warnings;
 use utf8;
 
-use Carp;
+#use Carp;
 
 use DateTime;
 use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate SCALAR BOOLEAN OBJECT CODEREF );
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
+# Simple regexp blocks
 our %PARTS = (
     year_long   => qr/(\d{4})/o,
-    year_short  => qr/(\d{1,2})/o,
-    day_month   => qr/(3[01]|[12]\d|[1-9])/o,
-    day_year    => qr/([1-3]\d\d|[1-9]\d|[1-9])/o,
+    year_short  => qr/(\d{2})/o,
+    day_month   => qr/(3[01]|[12]\d|0?[1-9])/o,
+    day_year    => qr/([1-3]\d\d|0?[1-9]\d|(?:00)?[1-9])/o,
     day_week    => qr/[1-7]/o,
-    month       => qr/(1[0-2]|[1-9])/o,
-    hour_23     => qr/(2[0-4]|1\d|\d)/o,
-    hour_24     => qr/(2[0-3]|1?\d)/o,
-    hour_12     => qr/(1[0-2]|[1-9])/o,
-    hour_11     => qr/(1[01]|\d)/o,
-    minute      => qr/([1-5]?\d)/o,
-    second      => qr/(6[01]|[1-5]?\d)/o,
+    month       => qr/(1[0-2]|0?[1-9])/o,
+    hour_23     => qr/(2[0-4]|1\d|0?\d)/o,
+    hour_24     => qr/(2[0-3]|1\d|0?[1-9])/o,
+    hour_12     => qr/(1[0-2]|0?[1-9])/o,
+    hour_11     => qr/(1[01]|0?\d)/o,
+    minute      => qr/([0-5]?\d)/o,
+    second      => qr/(6[01]|[0-5]?\d)/o,
     quarter     => qr/([1-4])/o,
-    week_year   => qr/(5[0-3]|[1-4]\d|[1-9])/o,
+    week_year   => qr/(5[0-3]|[1-4]\d|0?[1-9])/o,
     week_month  => qr/\d/o,
-    timezone    => qr/[+-](1[0-4]|0\d)(00|15|30|45)/o,
+    timezone    => qr/[+-](1[0-4]|0?\d)(00|15|30|45)/o,
     number      => qr/\d+/o,
     timezone2   => qr/([A-Z1-9a-z])([+-](1[0-4]|0\d)(00|15|30|45))/o,
 );
 
+# Table for mapping abbreviated timezone names to offsets
 our %ZONEMAP = (
      'A' => '+0100',       'ACDT' => '+1030',       'ACST' => '+0930',
    'ADT' => 'Ambiguous',   'AEDT' => '+1100',        'AES' => '+1000',
@@ -143,6 +145,12 @@ our %ZONEMAP = (
 'UTC'    => '+0000',
 );
 
+# Map of CLDR commands to values
+# Value might be
+# - Regular expression (usually aken from %PART)
+# - DateTime::Locale method names. Method must be returning lists of valid values
+# - Arrayref of valid values
+
 our %PARSER = (
     G1      => 'era_abbreviated',
     G3      => 'era_wide',
@@ -216,18 +224,29 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     
     my $dt = $cldr->parse_datetime('23:16:42');
     
+    $cldr->format_datetime($dt);
+    # 23:16:42
+    
     # Get pattern from selected locale
     my $cldr = new DateTime::Format::CLDR(
         locale      => 'de_AT',
     );
     
     my $dt = $cldr->parse_datetime('23:16:42');
+    
+    # Croak when things go wrong:
+    my $cldr = new DateTime::Format::CLDR(
+        locale      => 'de_AT',
+        on_error    => 'croak',
+    );
 
 =head1 DESCRIPTION
 
 This module provides a parser (and also a formater) for datetime strings
 using patterns as defined by the Unicode CLDR Project 
 (Common Locale Data Repository). L<http://unicode.org/cldr/>. 
+
+CLDR format is supported by <DateTime> starting with version 0.40.
 
 =head1 METHODS
 
@@ -243,19 +262,28 @@ The following parameters are used by DateTime::Format::CLDR:
 
 =item * locale
 
-Locale.
+Locale. 
+
+See L<locale> accessor.
 
 =item * pattern (optional)
 
-CLDR pattern. See L<DateTime/"CLDR Patterns"> for details. If you don't provide
-a pattern the C<date_format_medium> pattern from L<DateTime::Local> for
-the selected locale will be used.
+CLDR pattern. If you don't provide a pattern the C<date_format_medium> 
+pattern from L<DateTime::Local> for the selected locale will be used. 
+
+See L<pattern> accessor.
 
 =item * time_zone (optional)
 
-Timezone that should be used. The time_zone parameter can be either a scalar 
-or a C<DateTime::TimeZone> object. A string will simply be passed to the 
-C<DateTime::TimeZone->new> method as its "name" parameter. 
+Timezone that should be used. 
+
+See L<time_zone> accessor.
+
+=item * on_error (optional)
+
+Error behaviour.
+
+See L<on_error> accessor.
 
 =back
 
@@ -263,22 +291,28 @@ C<DateTime::TimeZone->new> method as its "name" parameter.
 
 sub new {
     my $class = shift;
-    my %args = validate( @_, {  
+    my %args = validate( @_, { 
+        locale      => { type => SCALAR | OBJECT, default => 'en' }, 
         pattern     => { type => SCALAR, optional => 1  },
         time_zone   => { type => SCALAR | OBJECT, optional => 1 },
-        locale      => { type => SCALAR | OBJECT, default => 'en' },
+        on_error    => { type => SCALAR | CODEREF, optional => 1, default => 'undef' },
         }
     );
    
     my $self = bless \%args, $class;
-    
+
+    # Set default values    
     $args{time_zone} ||= DateTime::TimeZone->new( name => 'floating' );
-    $self->time_zone($args{time_zone});
     
+    # Pass on to accessors
+    $self->time_zone($args{time_zone});
     $self->locale($args{locale});
     
+    # Set default values  
     $args{pattern} ||= $self->locale->date_format_medium;
+    
     $self->pattern($args{pattern});
+    $self->on_error($args{on_error});
     
     return $self;
 }
@@ -287,7 +321,7 @@ sub new {
 
 =head3 pattern
 
-Get/set pattern. 
+Get/set pattern. See L<DateTime/"CLDR Patterns"> for details about patterns.
 
 =cut
 
@@ -307,6 +341,8 @@ sub pattern {
 =head3 time_zone
 
 Get/set time_zone. Returns a C<DateTime::TimeZone> object.
+
+Accepts either a timezone name or a C<DateTime::TimeZone> object.
 
 =cut
 
@@ -330,7 +366,9 @@ sub time_zone {
 
 =head3 locale
 
-Get/set locale. Returns a C<DateTime::Locale> object.
+Get/set a locale. Returns a C<DateTime::Locale> object.
+
+Accepts either a locale name or a C<DateTime::Locale::*> object.
 
 =cut
 
@@ -351,6 +389,45 @@ sub locale {
     }
     
     return $self->{locale};
+}
+
+=head3 on_error
+
+Get/set the on-error behaviour.
+
+Accepts the following values
+
+=over
+
+=item * 'undef'
+
+Returns undef on error
+
+=item * 'croak'
+
+Croak on error
+
+=item * CODEREF
+
+Run the given coderef on error.
+
+=back
+
+=cut
+
+sub on_error {
+    my $self = shift;
+    my $on_error = shift;
+    
+    # Set locale
+    if ($on_error) {
+        croak("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
+            unless ref($on_error) eq 'CODE'
+                or $on_error eq 'croak'
+                or $on_error eq 'undef';
+        return $self->{on_error};
+    }
+    return $self->{on_error};
 }
 
 =head2 Public Methods
@@ -388,14 +465,16 @@ sub parse_datetime {
         # Pattern
         if (ref $part eq 'ARRAY') {
             my ($regexp,$command,$index) = @{$part};
-            return undef
+            
+            # Match regexp part
+            return $self->_local_croak("Could not get datetime for $datetime_initial: $string")
                 unless ($string =~ s/\s* $regexp \s*//ix);
             
+            # Get capture
             my $capture = $1;
             
             # Pattern is a list: get index instead of value
-            if (grep { $command.$index eq $_ } 
-                qw(G1 G3 G5 Q3 Q4 q3 q4 M3 M4 M5 L3 L4 L5 E1 E4 E5 e3 e4 e5 c3 c4 a1 )) {
+            if (ref $PARSER{$command.$index} eq '') {
                 my $function = $PARSER{$command.$index};
                 my $count = 1;
                 foreach my $element (@{$self->{locale}->$function}) {
@@ -407,7 +486,7 @@ sub parse_datetime {
                 }
             }
             
-            # simple pattern
+            # Run patterns
             if ($command eq 'G' ) {
                 $datetime_check{era_name} = $capture;
             } elsif ($command eq 'y' && $index == 2) {
@@ -455,7 +534,7 @@ sub parse_datetime {
             } elsif (($command eq 'z' || $command eq 'v' || $command eq 'V') && $index == 1) {
                 if (! defined $ZONEMAP{$capture} 
                     || $ZONEMAP{$capture} eq 'Ambiguous') {
-                    warn ("Ambiguous timezone: $capture $command");
+                    $self->_local_carp("Ambiguous timezone: $capture $command");
                     next;
                 }
                 $datetime{time_zone} = DateTime::TimeZone->new(name => $ZONEMAP{$capture});
@@ -472,6 +551,7 @@ sub parse_datetime {
         }
     }
     
+    # Fix 12 hour time notations
     if (defined $datetime_info{hour12} 
         && defined $datetime_info{ampm}) {
         $datetime{hour} = $datetime_info{hour12};
@@ -481,13 +561,16 @@ sub parse_datetime {
     
     my $dt;
     
+    # Build datetime 
     eval {
         $dt = DateTime->new(%datetime);
     };
-    return undef if $@;
+    return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
+        if $@ || ref $dt ne 'DateTime';
     
+    # Perform checks
     foreach my $check ( keys %datetime_check ) {
-        warn ("Datetime '$check' does not match ($datetime_check{$check} - ".$dt->$check.") for $datetime_initial")
+        $self->_local_carp("Datetime '$check' does not match ($datetime_check{$check} - ".$dt->$check.") for $datetime_initial")
             unless $dt->$check == $datetime_check{$check};
     }
     
@@ -518,6 +601,7 @@ sub _build_pattern {
        
     $self->{_built_pattern} = [];
     
+    # Try to parse pattern one element each time
     while ($self->{pattern} =~ m/\G
         (?:
             '((?:[^']|'')*)' # quote escaped bit of text
@@ -532,16 +616,19 @@ sub _build_pattern {
         /sxg) {
         my ($string,$pattern,$rest) = ($1,$2,$4);
         
-        # Quoted string
+        # Found quoted string
         if ($string) {
             $string =~ s/\'\'/\'/g;
             push @{$self->{_built_pattern}}, "\Q".$string."\E";
             
-        # Pattern
+        # Found pattern
         } elsif ($pattern) {
+            # Get length and command
             my $length = length $pattern;
             my $command = substr $pattern,0,1;
             my ($rule,$regexp,$index);
+            
+            # Find most appropriate command
             for (my $count = $length; $count > 0; $count --) {
                 if (defined $PARSER{$command.$count}) {
                     $rule = $PARSER{$command.$count};
@@ -549,21 +636,24 @@ sub _build_pattern {
                     last;
                 }
             }
-            die("Broken pattern: $command $length")
-                unless $rule ;
             
-            # Regular expression
+            return $self->_local_croak("Broken pattern: $command $length")
+                unless $rule;
+            
+            # Pattern definition is regular expression
             if (ref $rule eq 'Regexp') {
-                $regexp =  '0*'.$rule;
+                #$regexp =  '0*'.$rule; # Match leading zeros
+                $regexp =  $rule;
             
-            # Array of possible values
+            # Pattern definition is array of possible values
             } elsif (ref $rule eq 'ARRAY') {
                 
                 $regexp = '('.(join '|',map {
                     "\Q".$_."\E";
                 } sort { length $b <=> length $a } @{$rule}).')';
+                # Try to find matching element (long elements first)
                 
-            # DateTime::Locale method (returning an array)
+            # Pattern definition is DateTime::Locale method (returning an array)
             } else {
                 $regexp = '('.(join '|',map {
                     "\Q".$_."\E";
@@ -572,7 +662,7 @@ sub _build_pattern {
             
             push @{$self->{_built_pattern}},[$regexp,$command,$index];
             
-        # Unqoted string
+        # Found unqoted string
         } elsif ($rest) {
             $rest =~ s/\'\'/\'/g;
             push @{$self->{_built_pattern}}, "\Q".$rest."\E";
@@ -581,14 +671,35 @@ sub _build_pattern {
     
     return $self->{_built_pattern};
 }
-#
-#sub _build_timezone {
-#    my $regexp =  $PARTS{timezone}.
-#        '('.(join '|',map {
-#        "\Q".$_."\E";
-#        } sort { length $b <=> length $a } keys %ZONEMAP).')';
-#    return qr/$regexp/o;
-#}
+
+sub _local_croak {
+    my $self = shift;
+    my $message = shift;
+    
+    # warn('LOCAL CROAK1'.$self->{on_error}.'-->'.$message);
+    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
+    
+    die($message) if $self->{on_error} eq 'croak';
+    $self->{errmsg} = $message;
+    
+    return undef if ($self->{on_error} eq 'undef');
+    return;
+}
+
+sub _local_carp {
+    my $self = shift;
+    my $message = shift;
+
+    #warn('LOCAL CARP');
+
+    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
+    
+    warn($message) if $self->{on_error} eq 'croak';
+    $self->{errmsg} = $message;
+    return undef if ($self->{on_error} eq 'undef');
+    return;
+}
+
 
 
 1;
@@ -885,6 +996,7 @@ datetime@perl.org mailing list
 
 L<http://datetime.perl.org/>
 
-L<DateTime>, L<DateTime::Locale>, L<DateTime::TimeZone>
+L<DateTime>, L<DateTime::Locale>, L<DateTime::TimeZone> 
+and L<DateTime::Format::Strptime>
 
 =cut

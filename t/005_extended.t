@@ -12,7 +12,6 @@ use Test::More tests => 101017;
 use DateTime::Locale::Catalog;
 use DateTime::TimeZone;
 
-
 use_ok( 'DateTime::Format::CLDR' );
 
 #my $time_zone = DateTime::TimeZone->new( name => 'Z' );
@@ -100,7 +99,7 @@ sub compare {
  
     my $dtc = $dtf->parse_datetime($dts);
     
-    unless($dtc && $dtc->isa('DateTime')) {
+    unless($dtc && ref $dtc && $dtc->isa('DateTime')) {
         fail('Not a DateTime: '.$dts);
         return;
     }

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Test::Exception;
 
 use DateTime::Format::CLDR;
@@ -39,3 +39,12 @@ $datetime = $cldr->parse_datetime('Xer 12 , 2008');
 
 is($datetime,undef);
 
+
+my $cldr2 = DateTime::Format::CLDR->new(
+    on_error    => 'croak',
+    locale      => 'de_AT'
+);
+
+throws_ok { 
+    $cldr2->parse_datetime('HASE');
+} qr/Could not get datetime for HASE/;
