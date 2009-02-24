@@ -12,7 +12,7 @@ use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate SCALAR BOOLEAN OBJECT CODEREF );
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 # Simple regexp blocks
 our %PARTS = (
@@ -147,9 +147,9 @@ our %ZONEMAP = (
 
 # Map of CLDR commands to values
 # Value might be
-# - Regular expression (usually aken from %PART)
-# - DateTime::Locale method names. Method must be returning lists of valid values
-# - Arrayref of valid values
+# - Regular expression: usually taken from %PART
+# - String: DateTime::Locale method names. Method must retun lists of valid values
+# - Arrayref: List of valid values
 
 our %PARSER = (
     G1      => 'era_abbreviated',
@@ -217,7 +217,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     use DateTime::Format::CLDR;
     
     my $cldr = new DateTime::Format::CLDR(
-        pattern     => '%T',
+        pattern     => 'HH:mm:ss',
         locale      => 'de_AT',
         time_zone   => 'Europe/Vienna',
     );
@@ -232,13 +232,17 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
         locale      => 'de_AT',
     );
     
-    my $dt = $cldr->parse_datetime('23:16:42');
+    # pattern is set to 'date_format_medium' from DateTime::Locale::de_AT
+    my $dt = $cldr->parse_datetime('23.11.2007');
     
     # Croak when things go wrong:
     my $cldr = new DateTime::Format::CLDR(
         locale      => 'de_AT',
         on_error    => 'croak',
     );
+    
+    # This will croak
+    $cldr->parse_datetime('23.33.2007');
 
 =head1 DESCRIPTION
 
@@ -246,7 +250,8 @@ This module provides a parser (and also a formater) for datetime strings
 using patterns as defined by the Unicode CLDR Project 
 (Common Locale Data Repository). L<http://unicode.org/cldr/>. 
 
-CLDR format is supported by <DateTime> starting with version 0.40.
+CLDR format is supported by L<DateTime> and L<DateTime::Locale> starting with 
+version 0.40.
 
 =head1 METHODS
 
@@ -285,6 +290,12 @@ Error behaviour.
 
 See L<on_error> accessor.
 
+=item * incomplete (optional)
+
+Set the behaviour how to handle incomplete Date information.
+
+See L<incomplete> accessor.
+
 =back
 
 =cut
@@ -292,10 +303,11 @@ See L<on_error> accessor.
 sub new {
     my $class = shift;
     my %args = validate( @_, { 
-        locale      => { type => SCALAR | OBJECT, default => 'en' }, 
-        pattern     => { type => SCALAR, optional => 1  },
-        time_zone   => { type => SCALAR | OBJECT, optional => 1 },
-        on_error    => { type => SCALAR | CODEREF, optional => 1, default => 'undef' },
+        locale          => { type => SCALAR | OBJECT, default => 'en' }, 
+        pattern         => { type => SCALAR, optional => 1  },
+        time_zone       => { type => SCALAR | OBJECT, optional => 1 },
+        on_error        => { type => SCALAR | CODEREF, optional => 1, default => 'undef' },
+        incomplete      => { type => SCALAR | CODEREF, optional => 1, default => 1 },
         }
     );
    
@@ -313,6 +325,7 @@ sub new {
     
     $self->pattern($args{pattern});
     $self->on_error($args{on_error});
+    $self->incomplete($args{incomplete});
     
     return $self;
 }
@@ -357,7 +370,7 @@ sub time_zone {
             $self->{time_zone} = $time_zone;
         } else {
             $self->{time_zone} = DateTime::TimeZone->new( name => $time_zone )
-                or croak("Could not create timezone from $time_zone");
+                or die("Could not create timezone from $time_zone");
         }  
     }
     
@@ -381,7 +394,7 @@ sub locale {
         unless (ref $locale
             && $locale->isa('DateTime::Locale::Base')) {
             $self->{locale} = DateTime::Locale->load( $locale )
-                or croak("Could not create locale from $locale");
+                or die("Could not create locale from $locale");
         } else {
             $self->{locale} = $locale;
         }  
@@ -393,7 +406,7 @@ sub locale {
 
 =head3 on_error
 
-Get/set the on-error behaviour.
+Get/set the error behaviour.
 
 Accepts the following values
 
@@ -421,13 +434,55 @@ sub on_error {
     
     # Set locale
     if ($on_error) {
-        croak("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
+        die("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
             unless ref($on_error) eq 'CODE'
                 or $on_error eq 'croak'
                 or $on_error eq 'undef';
         return $self->{on_error};
     }
     return $self->{on_error};
+}
+
+=head3 incomplete
+
+Set the behaviour how to handle incomplete Date information.
+
+Accepts the following values
+
+=over
+
+=item * 1
+
+Sets the missing values to '1'. Thus if you only parse a time you would
+get '0001-01-01' as the date.
+
+=item * 'incomplete'
+
+Create a L<DateTime::Incomplete> object instead.
+
+=item * CODEREF
+
+Run the given coderef on incomplete values. The code reference will be
+called with the C<DateTime::Format::CLDR> object and a hash of parsed values
+as supplied to C<DateTime-E<gt>new>. It should return a modified hash.
+
+=back
+
+=cut
+
+sub incomplete {
+    my $self = shift;
+    my $incomplete = shift;
+    
+    # Set locale
+    if ($incomplete) {
+        die("The value supplied to incomplete must be either 'incomplete', '1' or a code reference.")
+            unless ref($incomplete) eq 'CODE'
+                or $incomplete eq '1'
+                or $incomplete eq 'incomplete';
+        return $self->{incomplete};
+    }
+    return $self->{incomplete};
 }
 
 =head2 Public Methods
@@ -560,6 +615,29 @@ sub parse_datetime {
     }
     
     my $dt;
+    
+    # Handle incomplete datetime information
+    unless (defined $datetime{year} 
+        && defined $datetime{month}
+        && defined $datetime{day}) {
+            
+        # I want given/when in 5.8
+        if (ref $self->{incomplete} eq 'CODE') {
+            %datetime = &{$self->{incomplete}}($self,%datetime);
+        } elsif ($self->{incomplete} eq '1') {
+            $datetime{day} ||= 1;
+            $datetime{month} ||= 1;
+            $datetime{year} ||= 1;
+        } elsif ($self->{incomplete} eq 'incomplete') {
+            require DateTime::Incomplete;
+            my $dt = DateTime::Incomplete->new(%datetime);
+            return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
+                if $@ || ref $dt ne 'DateTime::Incomplete';
+            return $dt;
+        } else {
+            $self->_local_croak("Something went really wrong");
+        }
+    }
     
     # Build datetime 
     eval {

@@ -7,7 +7,13 @@ use warnings;
 no warnings qw(once);
 use utf8;
 
-use Test::More tests => 101017;
+use lib qw(t/lib);
+use testlib;
+
+use constant LOCALES =>qw(ar en de fr es pt bg ru nl it es fi cs si sk ru ro uk mk hu lt hu eu no se);
+
+use Test::More tests => 2 + (366 * 3 * 4 * 22) ;
+use Test::NoWarnings;
 
 use DateTime::Locale::Catalog;
 use DateTime::TimeZone;
@@ -17,13 +23,13 @@ use_ok( 'DateTime::Format::CLDR' );
 #my $time_zone = DateTime::TimeZone->new( name => 'Z' );
 my $time_zone = DateTime::TimeZone->new(name => 'Europe/Vienna');
 
-warn('Running extended tests: This may take a couple of minutes');
+explain('Running extended tests: This may take a couple of minutes');
 
 foreach my $localeid (DateTime::Locale::Catalog::Locales) {
     next if $localeid->{id} eq 'root';
-    next unless (grep { $localeid->{id} eq $_ } qw(ar en de fr es pt bg ru nl it es fi cs si sk ru ro uk mk hu lt hi eu dk no se));
+    next unless (grep { $localeid->{id} eq $_ } LOCALES);
 
-    warn("Running tests for locale '$localeid->{id}'");
+    explain("Running tests for locale '$localeid->{id}'");
 
     my $locale = DateTime::Locale->load( $localeid->{id} );
     
@@ -33,7 +39,7 @@ foreach my $localeid (DateTime::Locale::Catalog::Locales) {
         datetime_format_medium
         datetime_format_short)) {
             
-        #warn("SET LOCALE: $localeid->{id} : $pattern : ".$locale->$pattern()); 
+        #explain("SET LOCALE: $localeid->{id} : $pattern : ".$locale->$pattern()); 
             
         my $dtf = DateTime::Format::CLDR->new(
             locale      => $locale,
@@ -79,9 +85,9 @@ foreach my $localeid (DateTime::Locale::Catalog::Locales) {
         while ($dt3->year == 2008) {
 
             
-            compare($dtf,$dt1);
-            compare($dtf,$dt2);
-            compare($dtf,$dt3);
+            testlib::compare($dtf,$dt1);
+            testlib::compare($dtf,$dt2);
+            testlib::compare($dtf,$dt3);
             
             $dt1->add( days => 1 );
             $dt2->add( days => 1 );
@@ -91,30 +97,3 @@ foreach my $localeid (DateTime::Locale::Catalog::Locales) {
 }
 
 
-sub compare {
-    my $dtf = shift;
-    my $dt = shift;
-
-    my $dts = $dtf->format_datetime($dt);
- 
-    my $dtc = $dtf->parse_datetime($dts);
-    
-    unless($dtc && ref $dtc && $dtc->isa('DateTime')) {
-        fail('Not a DateTime: '.$dts);
-        return;
-    }
-    
-    unless ( DateTime->compare_ignore_floating( $dtc, $dt ) == 0) {
-        #.'::'.$dtc->nanosecond.'::'.$dtc->time_zone.'::'.$dtc->locale.
-        fail('Pattern: "'.$dtf->{pattern}.'"; '.
-            'String: "'.$dts.'"; '.
-            'Original: '.$dt.$dt->time_zone.'; '.
-            'Computed: '.$dtc.$dtc->time_zone.'; '.
-            'Locale: '.$dt->locale->id);  
-    }  else {
-        ok('Successfully compared datetime');
-    }
-    #is($dtc->iso8601,$dt->iso8601);
-
-    return;
-}

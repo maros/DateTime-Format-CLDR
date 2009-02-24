@@ -6,7 +6,8 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 9;
+use Test::More tests => 10;
+use Test::NoWarnings;
 
 use_ok( 'DateTime::Format::CLDR' );
 
