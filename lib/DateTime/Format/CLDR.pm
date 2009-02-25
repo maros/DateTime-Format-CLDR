@@ -12,7 +12,7 @@ use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate SCALAR BOOLEAN OBJECT CODEREF );
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 # Simple regexp blocks
 our %PARTS = (

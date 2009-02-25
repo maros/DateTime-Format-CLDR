@@ -19,5 +19,6 @@ build_requires  'Exporter'                  => 0;
 build_requires  'Test::Pod'                 => 0;
 build_requires  'Test::Pod::Coverage'       => 0;
 build_requires  'Test::Exception'           => 0;
+build_requires  'Test::NoWarnings'          => 0;
 
 WriteAll;
