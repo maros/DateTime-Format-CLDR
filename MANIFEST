@@ -23,4 +23,5 @@ t/007_bug_rt41392.t
 t/008_bug_rt43381.t
 t/009_incomplete.t
 t/010_patterns.t
+t/011_nanosecond.t
 t/lib/testlib.pm

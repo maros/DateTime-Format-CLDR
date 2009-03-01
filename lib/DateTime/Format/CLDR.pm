@@ -12,6 +12,10 @@ use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate_pos validate SCALAR BOOLEAN OBJECT CODEREF );
 
+our @ISA = 'Exporter';
+our @EXPORT_OK = qw( &cldr_format &cldr_parse );
+our @EXPORT = ();
+
 our $VERSION = '1.06';
 
 # Simple regexp blocks
@@ -329,6 +333,7 @@ sub new {
     $self->pattern($args{pattern});
     $self->on_error($args{on_error});
     $self->incomplete($args{incomplete});
+    $self->{errmsg} = undef;
     
     return $self;
 }
@@ -701,6 +706,57 @@ sub format_datetime {
     return $dt->format_cldr($self->{pattern});
 }
 
+
+=head3 errmsg
+
+ my $string = $cldr->errmsg();
+
+If the on_error behavior of the object is 'undef', error messages with this 
+method so you can work out why things went wrong.
+
+=cut
+
+sub errmsg {
+    $_[0]->{errmsg};
+}
+
+
+=head2 Exportable functions
+
+There are no methods exported by default, however the following are available:
+
+=head3 cldr_format
+
+ &cldr_format($pattern,$datetime);
+
+=cut
+
+sub cldr_format {
+    my ($pattern, $datetime) = @_;
+    
+    return $datetime->format_cldr($pattern);;
+}
+
+=head3 cldr_parse
+
+ &cldr_format($pattern,$string);
+ OR
+ &cldr_format($pattern,$string,$locale);
+
+=cut
+
+sub cldr_parse {
+    my ($pattern, $string, $locale) = @_;
+    
+    $locale ||= 'en';
+    return DateTime::Format::CLDR->new( 
+        pattern => $pattern,
+        locale  => $locale,
+        on_error=>'croak',
+    )->parse_datetime($string);
+}
+
+
 # ---------------------------------------------------------------------------
 # Private methods
 # ---------------------------------------------------------------------------
@@ -790,6 +846,8 @@ sub _build_pattern {
     return $self->{_built_pattern};
 }
 
+# Turn array into regexp
+
 sub _quoteslist {
     my ($list) = @_;
     return  
@@ -801,6 +859,8 @@ sub _quoteslist {
         ).
         ')';
 }
+
+# Quote regexp
 
 sub _quotestring {
     my ($quote) = @_;
@@ -835,9 +895,11 @@ sub _local_carp {
     
     warn($message) if $self->{on_error} eq 'croak';
     $self->{errmsg} = $message;
+    
     return undef if ($self->{on_error} eq 'undef');
     return;
 }
+
 
 
 

@@ -1,6 +1,11 @@
 Revision history for Perl module DateTime::Format::CLDR
 
-1.05 ? ? ? 2009
+1.06 Sun Mar 1 2009
+    - Fixed error in exception handling
+    - Tests for S{1,} pattern
+    - Changed interface to be more consistent with DateTime::Format::Strptime
+
+1.05 Sun Mar 1 2009
     - Updated documentation
     - Fixed some parsing rules
     - Adding parsing rule for S{1,} and j{1,2}
