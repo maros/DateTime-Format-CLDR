@@ -12,7 +12,7 @@ use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate_pos validate SCALAR BOOLEAN OBJECT CODEREF );
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 # Simple regexp blocks
 our %PARTS = (
@@ -30,9 +30,9 @@ our %PARTS = (
     second      => qr/(6[01]|[0-5]?\d)/o,
     quarter     => qr/([1-4])/o,
     week_year   => qr/(5[0-3]|[1-4]\d|0?[1-9])/o,
-    week_month  => qr/\d/o,
-    timezone    => qr/[+-](1[0-4]|0?\d)(00|15|30|45)/o,
-    number      => qr/\d+/o,
+    week_month  => qr/(\d)/o,
+    #timezone    => qr/[+-](1[0-4]|0?\d)(00|15|30|45)/o,
+    number      => qr/(\d+)/o,
     timezone2   => qr/([A-Z1-9a-z])([+-](1[0-4]|0\d)(00|15|30|45))/o,
 );
 
@@ -198,7 +198,7 @@ our %PARSER = (
     m1      => $PARTS{minute},
     s1      => $PARTS{second},
     S1      => $PARTS{number},
-    Z1      => $PARTS{timezone},
+    Z1      => [ grep { $_ ne 'Ambiguous' } values %ZONEMAP ],
     Z4      => $PARTS{timezone2},
     z1      => [ keys %ZONEMAP ],
     z4      => [ DateTime::TimeZone->all_names ],
@@ -234,7 +234,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
         locale      => 'de_AT',
     );
     
-    # pattern is set to 'date_format_medium' from DateTime::Locale::de_AT
+    # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
     my $dt = $cldr->parse_datetime('23.11.2007');
     
     # Croak when things go wrong:
@@ -618,14 +618,15 @@ sub parse_datetime {
        
         # String
         } else {
-            return undef
+            return $self->_local_croak("Could not get datetime for $datetime_initial: $string")
                 unless ($string =~ s/$part//ix);
         }
         
         #print "BEFORE: '$before' AFTER: '$string' PATTERN: '$part'\n";
     }
     
-    
+    return $self->_local_croak("Could not get datetime for $datetime_initial: $string") 
+        if $string;
     
     # Fix 12 hour time notations
     if (defined $datetime_info{hour12} 

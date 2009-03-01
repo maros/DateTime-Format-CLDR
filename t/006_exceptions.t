@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Test::Exception;
 
 use DateTime::Format::CLDR;
@@ -66,3 +66,18 @@ my $cldr3 = DateTime::Format::CLDR->new(
 throws_ok { 
     $cldr3->parse_datetime('HASE');
 } qr/LAPIN/;
+
+
+my $cldr4 = DateTime::Format::CLDR->new(
+    on_error    => 'croak',
+    pattern     => 'dd.MM.yyy',
+    locale      => 'de_AT'
+);
+
+throws_ok { 
+    $cldr4->parse_datetime('31.02.2009');
+} qr/Could not get datetime for/;
+
+throws_ok { 
+    $cldr4->parse_datetime('37.44.2009');
+} qr/Could not get datetime for/;

@@ -126,4 +126,3 @@ foreach my $pattern (@patterns_datetime) {
     testlib::compare($dtf,$dt3);
     testlib::compare($dtf,$dt4);
 }
-
