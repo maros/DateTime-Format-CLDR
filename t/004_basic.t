@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Test::NoWarnings;
 
 use_ok( 'DateTime::Format::CLDR' );
@@ -21,15 +21,23 @@ isa_ok($cldr->time_zone,'DateTime::TimeZone::Floating');
 
 $cldr->time_zone(DateTime::TimeZone::UTC->new);
 
-isa_ok($cldr->time_zone,'DateTime::TimeZone::UTC');
+isa_ok($cldr->time_zone,'DateTime::TimeZone::UTC','Timezone has been set');
 
 $cldr->locale(DateTime::Locale->load( 'de_DE' ));
 
-isa_ok($cldr->locale,'DateTime::Locale::de_DE');
+isa_ok($cldr->locale,'DateTime::Locale::de_DE','Locale has been set');
 
 is($cldr->pattern,'dd.MM.yyyy');
 
 my $datetime = $cldr->parse_datetime('22.11.2011');
 
 isa_ok($datetime,'DateTime');
-is($datetime->dmy,'22-11-2011');
+is($datetime->dmy,'22-11-2011','String has been parsed');
+
+$cldr->pattern('dd.MMMM.yyyy');
+
+is($cldr->pattern,'dd.MMMM.yyyy','Pattern has been set');
+
+my $datetime2 = $cldr->parse_datetime('22.November.2011');
+
+is($cldr->format_datetime(DateTime->new( year => 2011, day => 22, month => 11)),'22.November.2011','Formating works');

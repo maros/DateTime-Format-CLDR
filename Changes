@@ -1,12 +1,22 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.05 ? ? ? 2009
+    - Updated documentation
+    - Fixed some parsing rules
+    - Adding parsing rule for S{1,} and j{1,2}
+    - More tests
+    - Fixed some quoting issues
+
+1.04 Wed Feb 25 2009
+    - Added missing build dependency to Makefile.PL
+
 1.03 Thu Feb 24 2009
-    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=43381 (ECARROLL)
+    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=43381 (Evan Carroll)
     - Customizable handling of incomplete formats
     - Some more tests
 
 1.02 Thu Dec 05 2008
-    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=41392
+    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=41392 (Senthilvel Rangaswamy)
     - Better and customizable exception handling
     
 1.01 Wed Jul 16 2008

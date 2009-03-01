@@ -1,6 +1,6 @@
-# ================================================================
+# ============================================================================
 package DateTime::Format::CLDR;
-# ================================================================
+# ============================================================================
 use strict;
 use warnings;
 use utf8;
@@ -10,22 +10,22 @@ use utf8;
 use DateTime;
 use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
-use Params::Validate qw( validate SCALAR BOOLEAN OBJECT CODEREF );
+use Params::Validate qw( validate_pos validate SCALAR BOOLEAN OBJECT CODEREF );
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 # Simple regexp blocks
 our %PARTS = (
     year_long   => qr/(\d{4})/o,
     year_short  => qr/(\d{2})/o,
+    day_week    => qr/([1-7])/o,
     day_month   => qr/(3[01]|[12]\d|0?[1-9])/o,
     day_year    => qr/([1-3]\d\d|0?[1-9]\d|(?:00)?[1-9])/o,
-    day_week    => qr/[1-7]/o,
     month       => qr/(1[0-2]|0?[1-9])/o,
-    hour_23     => qr/(2[0-4]|1\d|0?\d)/o,
-    hour_24     => qr/(2[0-3]|1\d|0?[1-9])/o,
+    hour_23     => qr/(00|2[0-3]|1\d|0?\d)/o,
+    hour_24     => qr/(2[0-4]|1\d|0?[1-9])/o,
     hour_12     => qr/(1[0-2]|0?[1-9])/o,
-    hour_11     => qr/(1[01]|0?\d)/o,
+    hour_11     => qr/(00|1[01]|0?\d)/o,
     minute      => qr/([0-5]?\d)/o,
     second      => qr/(6[01]|[0-5]?\d)/o,
     quarter     => qr/([1-4])/o,
@@ -109,7 +109,7 @@ our %ZONEMAP = (
    'PET' => '-0500',      'PETST' => '+1300',       'PETT' => '+1200',
    'PGT' => '+1000',       'PHOT' => '+1300',        'PHT' => '+0800',
    'PKT' => '+0500',       'PMDT' => '-0200',        'PMT' => '-0300',
-   'PNT' => '-0830',       'PONT' => '+1100',        'PST' => 'Ambiguous',
+   'PNT' => '-0830',       'PONT' => '+1100',        'PST' => '-0800',
    'PWT' => '+0900',       'PYST' => '-0300',        'PYT' => '-0400',
      'Q' => '-0400',          'R' => '-0500',        'R1T' => '+0200',
    'R2T' => '+0300',        'RET' => '+0400',        'ROK' => '+0900',
@@ -153,7 +153,7 @@ our %ZONEMAP = (
 
 our %PARSER = (
     G1      => 'era_abbreviated',
-    G3      => 'era_wide',
+    G4      => 'era_wide',
     G5      => 'era_narrow',
     y1      => $PARTS{year_long},
     y2      => $PARTS{year_short},
@@ -178,6 +178,7 @@ our %PARSER = (
     W1      => $PARTS{week_month},
     d1      => $PARTS{day_month},
     D1      => $PARTS{day_year},
+    F1      => $PARTS{week_month},
     E1      => 'day_format_abbreviated',
     E4      => 'day_format_wide',
     E5      => 'day_format_narrow',
@@ -188,6 +189,7 @@ our %PARSER = (
     c1      => $PARTS{day_week},
     c3      => 'day_stand_alone_abbreviated',
     c4      => 'day_stand_alone_wide',
+    c5      => 'day_stand_alone_narrow',
     a1      => 'am_pm_abbreviated',
     h1      => $PARTS{hour_12},
     H1      => $PARTS{hour_23},
@@ -195,7 +197,7 @@ our %PARSER = (
     k1      => $PARTS{hour_24},
     m1      => $PARTS{minute},
     s1      => $PARTS{second},
-    s1      => $PARTS{second},
+    S1      => $PARTS{number},
     Z1      => $PARTS{timezone},
     Z4      => $PARTS{timezone2},
     z1      => [ keys %ZONEMAP ],
@@ -280,19 +282,20 @@ See L<pattern> accessor.
 
 =item * time_zone (optional)
 
-Timezone that should be used. 
+Timezone that should be used by default. If your pattern contains
+timezone information this attribute will be ignored. 
 
 See L<time_zone> accessor.
 
 =item * on_error (optional)
 
-Error behaviour.
+Set the error behaviour.
 
 See L<on_error> accessor.
 
 =item * incomplete (optional)
 
-Set the behaviour how to handle incomplete Date information.
+Set the behaviour how to handle incomplete date information.
 
 See L<incomplete> accessor.
 
@@ -412,7 +415,7 @@ Accepts the following values
 
 =over
 
-=item * 'undef'
+=item * 'undef' (Literal/default)
 
 Returns undef on error
 
@@ -451,7 +454,7 @@ Accepts the following values
 
 =over
 
-=item * 1
+=item * '1' (default)
 
 Sets the missing values to '1'. Thus if you only parse a time you would
 get '0001-01-01' as the date.
@@ -464,7 +467,8 @@ Create a L<DateTime::Incomplete> object instead.
 
 Run the given coderef on incomplete values. The code reference will be
 called with the C<DateTime::Format::CLDR> object and a hash of parsed values
-as supplied to C<DateTime-E<gt>new>. It should return a modified hash.
+as supplied to C<DateTime-E<gt>new>. It should return a modified hash which
+will be passed to C<DateTine-E<gt>new>.
 
 =back
 
@@ -491,13 +495,15 @@ sub incomplete {
 
  my $datetime = $cldr->parse_datetime($string);
 
-Parses a string and returns a C<DateTime> object on success. If the string
-cannot be parsed with the given pattern C<undef> is returned.
+Parses a string and returns a C<DateTime> object on success (If you provide
+incomplete data and set the L<incomplete> attribute accordingly it will 
+return a C<DateTime::Incomplete> object). If the string cannot be parsed 
+an error will be thrown (depending on the C<on_error> attribute).
 
 =cut
 
 sub parse_datetime {
-    my ( $self, $string ) = @_;
+    my ( $self, $string ) = validate_pos( @_, 1, { type => SCALAR  } );
     
     my $pattern = $self->_build_pattern();
 
@@ -517,13 +523,17 @@ sub parse_datetime {
     
     foreach my $part (@{$pattern}) {
         
+        #my $before = $string;
+        
         # Pattern
         if (ref $part eq 'ARRAY') {
             my ($regexp,$command,$index) = @{$part};
             
+            #print "TRY TO MATCH '$string' AGAINST '$regexp' WITH $command\n";
+            
             # Match regexp part
             return $self->_local_croak("Could not get datetime for $datetime_initial: $string")
-                unless ($string =~ s/\s* $regexp \s*//ix);
+                unless ($string =~ s/$regexp//ix);
             
             # Get capture
             my $capture = $1;
@@ -543,7 +553,7 @@ sub parse_datetime {
             
             # Run patterns
             if ($command eq 'G' ) {
-                $datetime_check{era_name} = $capture;
+                $datetime_info{era} = $capture;
             } elsif ($command eq 'y' && $index == 2) {
                 $datetime{year} = $capture;
                 if ($datetime{year} >= 70) {
@@ -566,21 +576,30 @@ sub parse_datetime {
             } elsif ($command eq 'D') {
                 $datetime_check{day_of_year} = $capture;
             } elsif ($command eq 'E' || $command eq 'e' || $command eq 'c') {   
+#                die $command . $pattern . $datetime_initial
+#                    unless defined $capture;
                 $datetime_check{day_of_week} = $capture;
+            } elsif ($command eq 'F') {
+                $datetime_check{weekday_of_month} = $capture;
             } elsif ($command eq 'a' ) {     
                 $datetime_info{ampm} = $capture;
             } elsif ($command eq 'h') { # 1-12
+                $capture = 0 if $capture == 12;
                 $datetime_info{hour12} = $capture;
             } elsif ($command eq 'K') { # 0-11
-                $datetime_info{hour12} = $capture+1;
+                #$capture = 12 if $capture == 0;
+                $datetime_info{hour12} = $capture;
             } elsif ($command eq 'H') { # 0-23
                 $datetime{hour} = $capture;
             } elsif ($command eq 'k') { # 1-24
-                $datetime{hour} = $capture - 1;
+                $capture = 0 if $capture == 24;
+                $datetime{hour} = $capture;
             } elsif ($command eq 'm') {
                 $datetime{minute} = $capture;
             } elsif ($command eq 's') {
                 $datetime{second} = $capture;
+            } elsif ($command eq 'S' ) {
+                $datetime{nanosecond} = "0.$capture" * 1000000000;
             } elsif ($command eq 'Z') {
                 if ($index >= 4) {
                     $capture = $3;
@@ -599,12 +618,14 @@ sub parse_datetime {
        
         # String
         } else {
-           
             return undef
-                unless ($string =~ s/\s
-                ? $part \s?//ix);
+                unless ($string =~ s/$part//ix);
         }
+        
+        #print "BEFORE: '$before' AFTER: '$string' PATTERN: '$part'\n";
     }
+    
+    
     
     # Fix 12 hour time notations
     if (defined $datetime_info{hour12} 
@@ -635,8 +656,14 @@ sub parse_datetime {
                 if $@ || ref $dt ne 'DateTime::Incomplete';
             return $dt;
         } else {
-            $self->_local_croak("Something went really wrong");
+            return $self->_local_croak("Something went really wrong!");
         }
+    }
+    
+    if (defined $datetime_info{era} 
+        && $datetime_info{era} == 0
+        && defined $datetime{year}) {
+        $datetime{year} *= -1;
     }
     
     # Build datetime 
@@ -660,15 +687,25 @@ sub parse_datetime {
 
  my $string = $cldr->format_datetime($datetime);
 
-Formats a C<DateTime> object using the set time_zone, locale and pattern.
+Formats a C<DateTime> object using the set locale and pattern. (not the
+time_zone)
 
 =cut
 
 sub format_datetime {
-    my ( $self, $dt ) = @_;
-    my $pattern = $self->{pattern};
-    return $dt->format_cldr($pattern);
+    my ( $self, $dt ) = validate_pos( @_, 1, { default => DateTime->now(), type => OBJECT } );
+    
+    $dt = $dt->clone;
+    $dt->set_locale($self->{locale}); 
+    return $dt->format_cldr($self->{pattern});
 }
+
+# ---------------------------------------------------------------------------
+# Private methods
+# ---------------------------------------------------------------------------
+
+# Parse the pattern and return a data sctructure that can be easily used
+# by parse_datetime
 
 sub _build_pattern {
     my $self = shift;
@@ -694,10 +731,11 @@ sub _build_pattern {
         /sxg) {
         my ($string,$pattern,$rest) = ($1,$2,$4);
         
+        
         # Found quoted string
         if ($string) {
             $string =~ s/\'\'/\'/g;
-            push @{$self->{_built_pattern}}, "\Q".$string."\E";
+            push @{$self->{_built_pattern}}, _quotestring($string);
             
         # Found pattern
         } elsif ($pattern) {
@@ -705,6 +743,11 @@ sub _build_pattern {
             my $length = length $pattern;
             my $command = substr $pattern,0,1;
             my ($rule,$regexp,$index);
+            
+            
+            if ($command eq 'j') {
+                $command = ($self->{locale}->prefers_24_hour_time()) ? 'H':'h';
+            }
             
             # Find most appropriate command
             for (my $count = $length; $count > 0; $count --) {
@@ -726,35 +769,52 @@ sub _build_pattern {
             # Pattern definition is array of possible values
             } elsif (ref $rule eq 'ARRAY') {
                 
-                $regexp = '('.(join '|',map {
-                    "\Q".$_."\E";
-                } sort { length $b <=> length $a } @{$rule}).')';
+                $regexp = _quoteslist($rule);
                 # Try to find matching element (long elements first)
                 
             # Pattern definition is DateTime::Locale method (returning an array)
             } else {
-                $regexp = '('.(join '|',map {
-                    "\Q".$_."\E";
-                } sort { length $b <=> length $a } @{$self->{locale}->$rule()}).')';
+                $regexp = _quoteslist($self->{locale}->$rule());
             }
             
             push @{$self->{_built_pattern}},[$regexp,$command,$index];
             
         # Found unqoted string
         } elsif ($rest) {
-            $rest =~ s/\'\'/\'/g;
-            push @{$self->{_built_pattern}}, "\Q".$rest."\E";
+            push @{$self->{_built_pattern}}, _quotestring($rest);
         }
     }
     
+    
     return $self->{_built_pattern};
 }
+
+sub _quoteslist {
+    my ($list) = @_;
+    return  
+        '('.
+        (join 
+            '|', 
+            map { _quotestring($_) } 
+            sort { length $b <=> length $a } @{$list}
+        ).
+        ')';
+}
+
+sub _quotestring {
+    my ($quote) = @_;
+   
+    $quote =~ s/([^[:alnum:][:space:]])/\\$1/g;
+    $quote =~ s/\s+/\\s+/g;
+    return $quote;
+}
+
+# Error
 
 sub _local_croak {
     my $self = shift;
     my $message = shift;
     
-    # warn('LOCAL CROAK1'.$self->{on_error}.'-->'.$message);
     return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
     
     die($message) if $self->{on_error} eq 'croak';
@@ -764,11 +824,11 @@ sub _local_croak {
     return;
 }
 
+# Warning
+
 sub _local_carp {
     my $self = shift;
     my $message = shift;
-
-    #warn('LOCAL CARP');
 
     return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
     
@@ -829,25 +889,37 @@ Same as "y" except that "uu" is not a special case.
 
 The quarter as a number (1..4).
 
+Not used to construct a date.
+
 =item * QQQ
 
 The abbreviated format form for the quarter.
+
+Not used to construct a date.
 
 =item * QQQQ
 
 The wide format form for the quarter.
 
+Not used to construct a date.
+
 =item * q{1,2}
 
 The quarter as a number (1..4).
+
+Not used to construct a date.
 
 =item * qqq
 
 The abbreviated stand-alone form for the quarter.
 
+Not used to construct a date.
+
 =item * qqqq
 
 The wide stand-alone form for the quarter.
+
+Not used to construct a date.
 
 =item * M{1,2}
 
@@ -907,21 +979,31 @@ Not used to construct a date.
 
 The day of the week in the month, from C<< $dt->weekday_of_month() >>.
 
+Not used to construct a date.
+
 =item * g{1,}
 
 The modified Julian day, from C<< $dt->mjd() >>.
+
+Not supported by DateTime::Format::CLDR
 
 =item * E{1,3}
 
 The abbreviated format form for the day of the week.
 
+Not used to construct a date.
+
 =item * EEEE
 
 The wide format form for the day of the week.
 
+Not used to construct a date.
+
 =item * EEEEE
 
 The narrow format form for the day of the week.
+
+Not used to construct a date.
 
 =item * e{1,2}
 
@@ -930,33 +1012,49 @@ day is considered the first day of the week, which varies by
 locale. For example, in the US, Sunday is the first day of the week,
 so this returns 2 for Monday.
 
+Not used to construct a date.
+
 =item * eee
 
 The abbreviated format form for the day of the week.
+
+Not used to construct a date.
 
 =item * eeee
 
 The wide format form for the day of the week.
 
+Not used to construct a date.
+
 =item * eeeee
 
 The narrow format form for the day of the week.
+
+Not used to construct a date.
 
 =item * c
 
 The numeric day of the week (not localized).
 
+Not used to construct a date.
+
 =item * ccc
 
 The abbreviated stand-alone form for the day of the week.
+
+Not used to construct a date.
 
 =item * cccc
 
 The wide stand-alone form for the day of the week.
 
+Not used to construct a date.
+
 =item * ccccc
 
 The narrow format form for the day of the week.
+
+Not used to construct a date.
 
 =item * a
 
@@ -994,9 +1092,14 @@ The second.
 
 =item * S{1,}
 
-Not supported by DateTime::Format::CLDR
+The fractional portion of the seconds, rounded based on the length of the 
+specifier. This returned without a leading decimal point, but may have 
+leading or trailing zeroes.
 
 =item * A{1,}
+
+The millisecond of the day, based on the current time. In other words, if it 
+is 12:00:00.00, this returns 43200000.
 
 Not supported by DateTime::Format::CLDR
 
@@ -1035,6 +1138,19 @@ The time zone long name.
 
 =back
 
+=head1 CAVEATS
+
+y and y{3} patterns can only parse four digit years (1000 -> 9999)
+
+Patterns like 'dMy' or 'yMd' are ambigous for some dates and might fail.
+
+Quote from the Author of C<DateTime::Format::Strptime> which also applies to
+this module:
+
+ "If your module uses this module to parse a known format: stop it. This module 
+ is clunky and slow because it can parse almost anything. Parsing a known 
+ format is not so difficult, is it? You'll make your module faster if you do. 
+ And you're not left at the whim of my potentially broken code."
 
 =head1 SUPPORT
 
