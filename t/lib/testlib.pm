@@ -10,20 +10,19 @@ sub compare {
  
     my $dtc = $dtf->parse_datetime($dts);
     
-    #use Data::Dumper;
-    
-    my $timezone = $dt->time_zone;  
+    my $timezone = $dt->time_zone->name;  
     my $locale = $dt->locale->id;
+    my $nanosecond = $dt->nanosecond(); 
       
     unless($dtc && ref $dtc && $dtc->isa('DateTime')) {
-        
+
         fail(join ("\n",
             "Pattern: '$dtf->{pattern}'",
             "String: '$dts'",
-            "Original: '$dt$timezone'",
+            "Original: '$dt.$nanosecond $timezone'",
             "Computed: UNDEF",
-            "Locale: '$locale'"
-            #,"Pattern: ". Dumper $dtf->{_built_pattern}
+            "Locale: '$locale'",
+            "Error: ".$dtf->errmsg,
             )
         );   
          
@@ -31,12 +30,13 @@ sub compare {
     }
     
     unless ( DateTime->compare_ignore_floating( $dtc, $dt ) == 0) {
-        
+        my $nanosecondc = $dtc->nanosecond;
+        my $timezonec = $dtc->time_zone->name;
         fail(join ("\n",
             "Pattern: '$dtf->{pattern}'",
             "String: '$dts'",
-            "Original: '$dt$timezone'",
-            "Computed: '$dtc".$dtc->time_zone."'",
+            "Original: '$dt.$nanosecond $timezone'",
+            "Computed: '$dtc.$nanosecondc $timezonec'",
             "Locale: '$locale'",
             #,"Pattern: ". Dumper $dtf->{_built_pattern}
             )
@@ -44,9 +44,8 @@ sub compare {
     }  else {
         ok('Successfully compared datetime');
     }
-    #is($dtc->iso8601,$dt->iso8601);
 
-    return;
+    return $dtc;
 }
 
 1;
