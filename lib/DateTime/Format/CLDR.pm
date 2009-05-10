@@ -7,16 +7,18 @@ use utf8;
 
 #use Carp;
 
+use version;
 use DateTime;
 use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate_pos validate SCALAR BOOLEAN OBJECT CODEREF );
+use Exporter;
 
 our @ISA = 'Exporter';
-our @EXPORT_OK = qw( &cldr_format &cldr_parse );
+our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
-our $VERSION = '1.06';
+our $VERSION = version->new("1.07");
 
 # Simple regexp blocks
 our %PARTS = (
@@ -37,7 +39,7 @@ our %PARTS = (
     week_month  => qr/(\d)/o,
     #timezone    => qr/[+-](1[0-4]|0?\d)(00|15|30|45)/o,
     number      => qr/(\d+)/o,
-    timezone2   => qr/([A-Z1-9a-z])([+-](1[0-4]|0\d)(00|15|30|45))/o,
+    timezone2   => qr/([A-Z1-9a-z]+)([+-](?:1[0-4]|0\d)(?:00|15|30|45))/o,
 );
 
 # Table for mapping abbreviated timezone names to offsets
@@ -113,7 +115,7 @@ our %ZONEMAP = (
    'PET' => '-0500',      'PETST' => '+1300',       'PETT' => '+1200',
    'PGT' => '+1000',       'PHOT' => '+1300',        'PHT' => '+0800',
    'PKT' => '+0500',       'PMDT' => '-0200',        'PMT' => '-0300',
-   'PNT' => '-0830',       'PONT' => '+1100',        'PST' => '-0800',
+   'PNT' => '-0830',       'PONT' => '+1100',        'PST' => 'Ambiguous',
    'PWT' => '+0900',       'PYST' => '-0300',        'PYT' => '-0400',
      'Q' => '-0400',          'R' => '-0500',        'R1T' => '+0200',
    'R2T' => '+0300',        'RET' => '+0400',        'ROK' => '+0900',
@@ -123,7 +125,7 @@ our %ZONEMAP = (
    'SWT' => '+0100',          'T' => '-0700',        'TFT' => '+0500',
    'THA' => '+0700',       'THAT' => '-1000',        'TJT' => '+0500',
    'TKT' => '-1000',        'TMT' => '+0500',        'TOT' => '+1300',
-  'TRUT' => '+1000',        'TST' => '+0300',        'TUC' => '+0000',
+  'TRUT' => '+1000',        'TST' => '+0300',       'TUC ' => '+0000',
    'TVT' => '+1200',          'U' => '-0800',      'ULAST' => '+0900',
   'ULAT' => '+0800',       'USZ1' => '+0200',      'USZ1S' => '+0300',
   'USZ3' => '+0400',      'USZ3S' => '+0500',       'USZ4' => '+0500',
@@ -145,9 +147,8 @@ our %ZONEMAP = (
      'Y' => '-1200',      'YAKST' => '+1000',       'YAKT' => '+0900',
   'YAPT' => '+1000',        'YDT' => '-0800',      'YEKST' => '+0600',
   'YEKT' => '+0500',        'YST' => '-0900',          'Z' => '+0000',
-'floating'=> 'Ambiguous',
-'UTC'    => '+0000',
 );
+
 
 # Map of CLDR commands to values
 # Value might be
@@ -323,6 +324,8 @@ sub new {
     # Set default values    
     $args{time_zone} ||= DateTime::TimeZone->new( name => 'floating' );
     
+    
+    
     # Pass on to accessors
     $self->time_zone($args{time_zone});
     $self->locale($args{locale});
@@ -420,9 +423,9 @@ Accepts the following values
 
 =over
 
-=item * 'undef' (Literal/default)
+=item * 'undef' (Literal) (default)
 
-Returns undef on error
+Returns undef on error and sets L<errmsg>
 
 =item * 'croak'
 
@@ -526,7 +529,7 @@ sub parse_datetime {
         nanosecond  => 0,
     );
     
-    foreach my $part (@{$pattern}) {
+    PART: foreach my $part (@{$pattern}) {
         
         #my $before = $string;
         
@@ -547,13 +550,18 @@ sub parse_datetime {
             if (ref $PARSER{$command.$index} eq '') {
                 my $function = $PARSER{$command.$index};
                 my $count = 1;
+                my $tmpcapture;
                 foreach my $element (@{$self->{locale}->$function}) {
                     if ($element eq $capture) {
-                        $capture = $count;
-                        last;
+                        if (defined $tmpcapture) {
+                            $self->_local_carp("Expression '$capture' is ambigous for pattern '$command$index' ");
+                            next PART;
+                        }
+                        $tmpcapture = $count;
                     }
                     $count ++;
                 }
+                $capture = $tmpcapture;
             }
             
             # Run patterns
@@ -580,9 +588,12 @@ sub parse_datetime {
                 $datetime{day} = $capture;
             } elsif ($command eq 'D') {
                 $datetime_check{day_of_year} = $capture;
-            } elsif ($command eq 'E' || $command eq 'e' || $command eq 'c') {   
-#                die $command . $pattern . $datetime_initial
-#                    unless defined $capture;
+            } elsif ($command eq 'e'  && $index == 1) {
+                my $fdow = $self->{locale}->first_day_of_week();
+                $capture -= (8 - $fdow);
+                $capture += 7 if $capture < 1;
+                $datetime_check{day_of_week} = $capture;
+            } elsif ($command eq 'E' || $command eq 'c' || $command eq 'e') {   
                 $datetime_check{day_of_week} = $capture;
             } elsif ($command eq 'F') {
                 $datetime_check{weekday_of_month} = $capture;
@@ -607,9 +618,9 @@ sub parse_datetime {
                 $datetime{nanosecond} = "0.$capture" * 1000000000;
             } elsif ($command eq 'Z') {
                 if ($index >= 4) {
-                    $capture = $3;
+                    $capture = $2;
                 }
-                $datetime{time_zone} = DateTime::TimeZone->new(name => $capture);
+                $datetime{time_zone} = DateTime::TimeZone->new( name => $capture );
             } elsif (($command eq 'z' || $command eq 'v' || $command eq 'V') && $index == 1) {
                 if (! defined $ZONEMAP{$capture} 
                     || $ZONEMAP{$capture} eq 'Ambiguous') {
@@ -681,8 +692,12 @@ sub parse_datetime {
     
     # Perform checks
     foreach my $check ( keys %datetime_check ) {
-        $self->_local_carp("Datetime '$check' does not match ($datetime_check{$check} - ".$dt->$check.") for $datetime_initial")
-            unless $dt->$check == $datetime_check{$check};
+        unless ($dt->$check == $datetime_check{$check}) {
+            my @return = $self->_local_croak("Datetime '$check' does not match ('$datetime_check{$check}' vs. '".$dt->$check."') for $datetime_initial");
+            return @return
+                if scalar @return;
+        }
+            
     }
     
 
@@ -711,8 +726,8 @@ sub format_datetime {
 
  my $string = $cldr->errmsg();
 
-If the on_error behavior of the object is 'undef', error messages with this 
-method so you can work out why things went wrong.
+Stores the last error message. Usefull if the on_error behavior of the 
+object is 'undef', so you can work out why things went wrong.
 
 =cut
 
@@ -742,6 +757,8 @@ sub cldr_format {
  &cldr_format($pattern,$string);
  OR
  &cldr_format($pattern,$string,$locale);
+ 
+Default locale is 'en'.
 
 =cut
 
@@ -876,12 +893,14 @@ sub _local_croak {
     my $self = shift;
     my $message = shift;
     
+    $self->{errmsg} = $message;
+
     return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
     
     die($message) if $self->{on_error} eq 'croak';
-    $self->{errmsg} = $message;
     
     return undef if ($self->{on_error} eq 'undef');
+    
     return;
 }
 
@@ -891,12 +910,14 @@ sub _local_carp {
     my $self = shift;
     my $message = shift;
 
-    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
-    
-    warn($message) if $self->{on_error} eq 'croak';
     $self->{errmsg} = $message;
+
+    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
+
+    warn($message) if $self->{on_error} eq 'croak';
     
     return undef if ($self->{on_error} eq 'undef');
+    
     return;
 }
 
@@ -906,6 +927,17 @@ sub _local_carp {
 1;
 
 =head1 CLDR PATTERNS
+
+=head2 Parsing
+
+Some patterns like day of week, quarter, ect. cannot be used to construct
+a date. However these patterns can be parsed, and a warning will be 
+issued if they do not match the parsed date. 
+
+Ambigous patterns (eg. narrow day of week formats for many locales) will
+be parsed but ignored in datetime calculation.
+
+=head2 Supported CLDR Patterns
 
 See L<DateTime/"CLDR Patterns">.
 
@@ -1205,7 +1237,8 @@ The time zone long name.
 
 y and y{3} patterns can only parse four digit years (1000 -> 9999)
 
-Patterns like 'dMy' or 'yMd' are ambigous for some dates and might fail.
+Patterns without separators (like 'dMy' or 'yMd') are ambigous for some 
+dates and might fail.
 
 Quote from the Author of C<DateTime::Format::Strptime> which also applies to
 this module:
