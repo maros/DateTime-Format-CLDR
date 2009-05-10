@@ -6,8 +6,9 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 12;
+use Test::More tests => 17;
 use Test::Exception;
+use Test::Warn;
 
 use DateTime::Format::CLDR;
 
@@ -81,3 +82,39 @@ throws_ok {
 throws_ok { 
     $cldr4->parse_datetime('37.44.2009');
 } qr/Could not get datetime for/;
+
+throws_ok { 
+    $cldr4->parse_datetime('29.02.2009');
+} qr/Could not get datetime for/;
+
+like($cldr4->errmsg,qr/Could not get datetime for/);
+
+my $cldr5 = DateTime::Format::CLDR->new(
+    on_error    => 'croak',
+    pattern     => 'dd.MM.yyy EEEE',
+    locale      => 'de_AT'
+);
+
+throws_ok { 
+    $cldr5->parse_datetime('02.03.2009 Mittwoch');
+} qr/Datetime 'day_of_week' does not match/;
+
+my $cldr6 = DateTime::Format::CLDR->new(
+    on_error    => 'croak',
+    pattern     => 'dd.MM.yyy HH:mm z',
+);
+
+warning_like {
+    $cldr6->parse_datetime('02.03.2009 12:30 EST');
+} qr/Ambiguous timezone/i,"Parse ambiguous timezone";
+
+my $cldr7 = DateTime::Format::CLDR->new(
+    on_error    => 'croak',
+    pattern     => 'dd.MM LLLLL.yyy',
+    locale      => 'de'
+);
+
+warning_like {
+    $cldr7->parse_datetime('02.05 M.2009')
+} qr/Expression 'M' is ambigous/,"Parse ambiguous pattern";
+
