@@ -2,6 +2,12 @@
 
 # t/002_pod.t - check pod
 
-use Test::Pod tests => 1;
+use strict;
+use warnings;
+use Test::More;
 
-pod_file_ok( "lib/DateTime/Format/CLDR.pm", "Valid POD file" );
+eval "use Test::Pod 1.18";
+plan skip_all => 'Test::Pod 1.18 required' if $@;
+plan skip_all => 'set TEST_POD to enable this test' unless $ENV{TEST_POD};
+
+all_pod_files_ok();

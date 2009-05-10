@@ -2,10 +2,12 @@
 
 # t/003_podcoverage.t - check pod coverage
 
-use Test::More tests=>1;
-eval "use Test::Pod::Coverage";
-plan skip_all => "Test::Pod::Coverage required for testing POD coverage" if $@;
+use strict;
+use warnings;
+use Test::More;
 
-pod_coverage_ok( 
-    "DateTime::Format::CLDR", 
-    "POD is covered" );
+eval "use Test::Pod::Coverage 1.04";
+plan skip_all => 'Test::Pod::Coverage 1.04 required' if $@;
+plan skip_all => 'set TEST_POD to enable this test' unless $ENV{TEST_POD};
+
+all_pod_coverage_ok();
