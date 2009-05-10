@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 use Test::NoWarnings;
 
 use_ok( 'DateTime::Format::CLDR' );
@@ -33,6 +33,8 @@ my $datetime = $cldr->parse_datetime('22.11.2011');
 
 isa_ok($datetime,'DateTime');
 is($datetime->dmy,'22-11-2011','String has been parsed');
+isa_ok($datetime->time_zone,'DateTime::TimeZone::UTC','String has correct timezone');
+isa_ok($datetime->locale,'DateTime::Locale::de_DE','String has correct locale');
 
 $cldr->pattern('dd.MMMM.yyyy');
 

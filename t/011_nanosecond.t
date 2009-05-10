@@ -1,6 +1,6 @@
 # -*- perl -*-
 
-# t/010_patterns.t - check various patterns
+# t/011_nanosecond.t - nanosecond parsing
 
 use strict;
 use warnings;

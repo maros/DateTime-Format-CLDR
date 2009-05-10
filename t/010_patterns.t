@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 1 + (4*4) + (30 * 3);
+use Test::More tests => 1 + (5*4) + (33 * 3);
 use Test::NoWarnings;
 
 use lib qw(t/lib);
@@ -37,18 +37,17 @@ my @patterns_date = (
     "dd LLLL yyy",
     "dd.MM.yyy G Q",
     "dd.MM.yyy GGGG QQQ",
-    #"dd.MM.yyy GGGGG QQQQ",
-    #"dd.MM.yyy w q",
-    #"dd.MM.yyy W qqq",
-    #"dd.MM.yyy F qqqq",
+    "dd.MM.yyy GGGGG QQQQ",
+    "dd.MM.yyy w q",
+    "dd.MM.yyy W qqq",
+    "dd.MM.yyy F qqqq",
     "dd.MM.yyy e",
     "dd.MM.yyy eee",
     "dd.MM.yyy eeee",
-    "dd.MM.yyy eeeee",
     "dd.MM.yyy c",
     "dd.MM.yyy ccc",
     "dd.MM.yyy cccc",
-    "dd.MM.yyy ccccc",
+    "dd.MM.yyy D",
 );
 
 my @patterns_datetime = (
@@ -56,7 +55,7 @@ my @patterns_datetime = (
     'dd.MM.yyy HH:mm',
     'dd.MM.yyy KK:mm a',
     'dd.MM.yyy kk:mm',
-    #'dd.MM.yyy jj:mm a',
+    'dd.MM.yyy jj:mm a',
 );
 
 foreach my $pattern (@patterns_date) {
