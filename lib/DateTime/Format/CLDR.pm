@@ -18,7 +18,7 @@ our @ISA = 'Exporter';
 our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
-our $VERSION = version->new("1.07");
+our $VERSION = version->new("1.08");
 
 # Simple regexp blocks
 our %PARTS = (

@@ -1,5 +1,17 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.08 Sun May 10 2009
+    - Show more information if tests fail
+    - Run less extended tests (Adam Kennedy)
+    - Updated module dependencies (DateTime)
+    - More testcases: Export, Exeption, Timezone
+    - Fixed bugs in 'c','e' and 'ZZZZ' patterns
+    - Total Test coverage is 90% (statement coverage 97%)
+
+1.07 Sun Mar 12 2009
+    - Show more info in test output
+    - Updated module dependencies
+
 1.06 Sun Mar 1 2009
     - Fixed error in exception handling
     - Tests for S{1,} pattern
@@ -16,12 +28,12 @@ Revision history for Perl module DateTime::Format::CLDR
     - Added missing build dependency to Makefile.PL
 
 1.03 Thu Feb 24 2009
-    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=43381 (Evan Carroll)
+    - Fixed bug RT43381 (Evan Carroll)
     - Customizable handling of incomplete formats
     - Some more tests
 
 1.02 Thu Dec 05 2008
-    - Fixed bug http://rt.cpan.org/Public/Bug/Display.html?id=41392 (Senthilvel Rangaswamy)
+    - Fixed bug RT41392 (Senthilvel Rangaswamy)
     - Better and customizable exception handling
     
 1.01 Wed Jul 16 2008
