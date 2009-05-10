@@ -1,6 +1,6 @@
 # -*- perl -*-
 
-# t/005_extended.t - check extended 
+# t/005_extended.t - check extended locales
 
 use strict;
 use warnings;
@@ -10,9 +10,10 @@ use utf8;
 use lib qw(t/lib);
 use testlib;
 
-use constant LOCALES =>qw(ar en de fr es pt bg ru nl it es fi cs si sk ru ro uk mk hu lt hu eu no se);
-
-use Test::More tests => 2 + (366 * 3 * 4 * 22) ;
+BEGIN {
+    use constant LOCALES => qw(ar en ru);
+    use Test::More tests => 2 + (366 * 3 * 4 * 3) ;
+}
 use Test::NoWarnings;
 
 use DateTime::Locale::Catalog;
