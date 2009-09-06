@@ -1,6 +1,6 @@
 # -*- perl -*-
 
-# t/009_exceptions.t - check incomplete cldr patterns
+# t/009_incomplete.t - check incomplete cldr patterns
 
 use strict;
 use warnings;

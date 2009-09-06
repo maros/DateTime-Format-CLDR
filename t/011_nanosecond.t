@@ -14,6 +14,8 @@ use testlib;
 
 use DateTime::Format::CLDR;
 
+explain("This test might fail on some plattforms due to unknown reasons");
+
 my $dtf1 = DateTime::Format::CLDR->new(
     locale      => 'en_US',
     pattern     => 'dd.MM.yyy HH:mm:ss.SSSSSSSSS',
