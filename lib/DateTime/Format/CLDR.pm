@@ -324,8 +324,6 @@ sub new {
     # Set default values    
     $args{time_zone} ||= DateTime::TimeZone->new( name => 'floating' );
     
-    
-    
     # Pass on to accessors
     $self->time_zone($args{time_zone});
     $self->locale($args{locale});
@@ -630,6 +628,8 @@ sub parse_datetime {
                 $datetime{time_zone} = DateTime::TimeZone->new(name => $ZONEMAP{$capture});
             } elsif ($command eq 'z' || $command eq 'v' || $command eq 'V') {
                 $datetime{time_zone} = DateTime::TimeZone->new(name => $capture);
+            } else {
+                return $self->_local_croak("Something went really wrong: Unknown pattern $command$index");
             }
        
         # String
@@ -644,7 +644,7 @@ sub parse_datetime {
     return $self->_local_croak("Could not get datetime for $datetime_initial: $string") 
         if $string;
     
-    # Fix 12 hour time notations
+    # Handle 12 hour time notations
     if (defined $datetime_info{hour12} 
         && defined $datetime_info{ampm}) {
         $datetime{hour} = $datetime_info{hour12};
@@ -652,7 +652,12 @@ sub parse_datetime {
             if $datetime_info{ampm} == 2 && $datetime{hour} < 12;
     }
     
-    my $dt;
+    # Handle era
+    if (defined $datetime_info{era} 
+        && $datetime_info{era} == 0
+        && defined $datetime{year}) {
+        $datetime{year} *= -1;
+    }
     
     # Handle incomplete datetime information
     unless (defined $datetime{year} 
@@ -668,22 +673,20 @@ sub parse_datetime {
             $datetime{year} ||= 1;
         } elsif ($self->{incomplete} eq 'incomplete') {
             require DateTime::Incomplete;
-            my $dt = DateTime::Incomplete->new(%datetime);
+            my $dt;
+            eval {
+                $dt = DateTime::Incomplete->new(%datetime);
+            };
             return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
                 if $@ || ref $dt ne 'DateTime::Incomplete';
             return $dt;
         } else {
-            return $self->_local_croak("Something went really wrong!");
+            return $self->_local_croak("Something went really wrong: Invalid incomplete setting");
         }
     }
     
-    if (defined $datetime_info{era} 
-        && $datetime_info{era} == 0
-        && defined $datetime{year}) {
-        $datetime{year} *= -1;
-    }
-    
     # Build datetime 
+    my $dt;
     eval {
         $dt = DateTime->new(%datetime);
     };
@@ -696,10 +699,8 @@ sub parse_datetime {
             my @return = $self->_local_croak("Datetime '$check' does not match ('$datetime_check{$check}' vs. '".$dt->$check."') for $datetime_initial");
             return @return
                 if scalar @return;
-        }
-            
+        }   
     }
-    
 
     return $dt;
 }
@@ -749,7 +750,7 @@ There are no methods exported by default, however the following are available:
 sub cldr_format {
     my ($pattern, $datetime) = @_;
     
-    return $datetime->format_cldr($pattern);;
+    return $datetime->format_cldr($pattern);
 }
 
 =head3 cldr_parse
@@ -818,7 +819,7 @@ sub _build_pattern {
             my $command = substr $pattern,0,1;
             my ($rule,$regexp,$index);
             
-            
+            # Inflate 'j' pattern depending on locale
             if ($command eq 'j') {
                 $command = ($self->{locale}->prefers_24_hour_time()) ? 'H':'h';
             }
