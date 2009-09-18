@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 1 + (5*4) + (33 * 3);
+use Test::More tests => 1 + (5*4) + (33 * 3) + (18 * 2);
 use Test::NoWarnings;
 
 use lib qw(t/lib);
@@ -83,6 +83,23 @@ foreach my $pattern (@patterns_date) {
     testlib::compare($dtf,$dt1);
     testlib::compare($dtf,$dt2);
     testlib::compare($dtf,$dt3);
+    
+    if ($pattern =~ /yyy+/) {
+        my $dt4 = DateTime->new({
+            year    => 600,
+            month   => 10,
+            day     => 31,
+        });
+        my $dt5 = DateTime->new({
+            year    => -100,
+            month   => 10,
+            day     => 31,
+        });
+        
+    
+        testlib::compare($dtf,$dt4);
+        testlib::compare($dtf,$dt5);
+    }
 }
 
 foreach my $pattern (@patterns_datetime) {

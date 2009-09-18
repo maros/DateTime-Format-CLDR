@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 14;
+use Test::More tests => 19;
 use Test::NoWarnings;
 
 use_ok( 'DateTime::Format::CLDR' );
@@ -15,6 +15,8 @@ my $cldr = DateTime::Format::CLDR->new(
     locale  => 'de_AT',
 );
 
+is($cldr->incomplete,1,'incomplete accessor');
+is($cldr->on_error,'undef','on_error accessor');
 isa_ok($cldr,'DateTime::Format::CLDR');
 isa_ok($cldr->locale,'DateTime::Locale::de_AT');
 isa_ok($cldr->time_zone,'DateTime::TimeZone::Floating');
@@ -42,4 +44,17 @@ is($cldr->pattern,'dd.MMMM.yyyy','Pattern has been set');
 
 my $datetime2 = $cldr->parse_datetime('22.November.2011');
 
+is($datetime2->dmy('.'),'22.11.2011','Parsing works');
+
 is($cldr->format_datetime(DateTime->new( year => 2011, day => 22, month => 11)),'22.November.2011','Formating works');
+
+my $cldr2 = DateTime::Format::CLDR->new(
+    locale      => 'de_AT',
+    time_zone   => 'Europe/Vienna',
+    pattern     => 'dd/MM (yyyy)'
+);
+
+my $datetime3 = $cldr2->parse_datetime('22/11 (2011)');
+
+is($datetime3->dmy('.'),'22.11.2011','Parsing works');
+is($cldr2->format_datetime(DateTime->new( year => 2011, day => 22, month => 11)),'22/11 (2011)','Formating works');
