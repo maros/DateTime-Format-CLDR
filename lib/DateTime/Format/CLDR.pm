@@ -18,7 +18,8 @@ our @ISA = 'Exporter';
 our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
-our $VERSION = version->new("1.08");
+our $AUTHORITY = 'cpan:MAROS';
+our $VERSION = version->new("1.09");
 
 # Simple regexp blocks
 our %PARTS = (
@@ -715,10 +716,16 @@ time_zone)
 =cut
 
 sub format_datetime {
-    my ( $self, $dt ) = validate_pos( @_, 1, { default => DateTime->now(), type => OBJECT } );
+    my ( $self, $dt ) = @_;
     
+    $dt = DateTime->now
+        unless defined $dt && ref $dt && $dt->isa('DateTime');
+    
+    #see http://rt.cpan.org/Public/Bug/Display.html?id=49605
+    #my ( $self, $dt ) = validate_pos( @_, 1, { default => DateTime->now, type => OBJECT } );
     $dt = $dt->clone;
     $dt->set_locale($self->{locale}); 
+    
     return $dt->format_cldr($self->{pattern});
 }
 
