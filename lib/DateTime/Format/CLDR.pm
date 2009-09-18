@@ -23,8 +23,8 @@ our $VERSION = version->new("1.09");
 
 # Simple regexp blocks
 our %PARTS = (
-    year_long   => qr/(\d{4})/o,
-    year_short  => qr/(\d{2})/o,
+    year_long   => qr/(-?\d{1,4})/o,
+    year_short  => qr/(-?\d{2})/o,
     day_week    => qr/([1-7])/o,
     day_month   => qr/(3[01]|[12]\d|0?[1-9])/o,
     day_year    => qr/([1-3]\d\d|0?[1-9]\d|(?:00)?[1-9])/o,
@@ -957,13 +957,9 @@ CLDR provides the following pattenrs:
 
 The abbreviated era (BC, AD).
 
-Not used to construct a date.
-
 =item * GGGG
 
 The wide era (Before Christ, Anno Domini).
-
-Not used to construct a date.
 
 =item * GGGGG
 
@@ -1242,8 +1238,6 @@ The time zone long name.
 =back
 
 =head1 CAVEATS
-
-y and y{3} patterns can only parse four digit years (1000 -> 9999)
 
 Patterns without separators (like 'dMy' or 'yMd') are ambigous for some 
 dates and might fail.
