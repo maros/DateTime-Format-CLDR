@@ -26,13 +26,11 @@ my $time_zone = DateTime::TimeZone->new(name => 'Europe/Vienna');
 
 explain('Running extended tests: This may take a couple of minutes');
 
-foreach my $localeid (DateTime::Locale::Catalog::Locales) {
-    next if $localeid->{id} eq 'root';
-    next unless (grep { $localeid->{id} eq $_ } LOCALES);
+foreach my $localeid (LOCALES) {
 
-    explain("Running tests for locale '$localeid->{id}'");
+    explain("Running tests for locale '$localeid'");
 
-    my $locale = DateTime::Locale->load( $localeid->{id} );
+    my $locale = DateTime::Locale->load( $localeid );
     
     foreach my $pattern (qw(
         datetime_format_long 
@@ -84,8 +82,6 @@ foreach my $localeid (DateTime::Locale::Catalog::Locales) {
         
         
         while ($dt3->year == 2008) {
-
-            
             testlib::compare($dtf,$dt1);
             testlib::compare($dtf,$dt2);
             testlib::compare($dtf,$dt3);
