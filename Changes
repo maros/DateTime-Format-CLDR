@@ -1,5 +1,12 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.09 Fri Sep 18 2008
+    - Added suppor for non 4-digit years and BC dates
+    - More tests, total coverage now 90%
+    - Fixed bug rt49605 (Bernhard Graf)
+    - Require latest DateTime::TimeZone to avoid test fails
+    - Handle era, throw error if things go really wrong
+
 1.08 Sun May 10 2009
     - Show more information if tests fail
     - Run less extended tests (Adam Kennedy)

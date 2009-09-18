@@ -26,4 +26,5 @@ t/010_patterns.t
 t/011_nanosecond.t
 t/012_export.t
 t/013_timezone.t
+t/014_bug_rt49605.t
 t/lib/testlib.pm
