@@ -2,11 +2,15 @@
 use strict;
 use inc::Module::Install;
 
-# Define metadata
-name            'DateTime-Format-CLDR';
-all_from        'lib/DateTime/Format/CLDR.pm';
+my $from = 'lib/DateTime/Format/CLDR.pm';
 
 perl_version    '5.008';
+
+# Define metadata
+name            'DateTime-Format-CLDR';
+all_from        $from;
+#readme_from     $from;
+#readme_markdown_from $from;
 
 # Specific dependencies
 requires        'DateTime'                  => '0.48';
