@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 17;
+use Test::More tests => 18;
 use Test::Exception;
 use Test::Warn;
 
@@ -118,3 +118,13 @@ warning_like {
     $cldr7->parse_datetime('02.05 M.2009')
 } qr/Expression 'M' is ambigous/,"Parse ambiguous pattern";
 
+
+$cldr = DateTime::Format::CLDR->new(
+    on_error=> 'undef', 
+    locale  => 'en', 
+    pattern => 'MMM d, yy eeee',
+);
+
+my $dt = $cldr->parse_datetime( 'Jan 3, 10 Friday' );
+
+is($dt,undef);

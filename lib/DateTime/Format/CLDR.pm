@@ -697,10 +697,8 @@ sub parse_datetime {
     # Perform checks
     foreach my $check ( keys %datetime_check ) {
         unless ($dt->$check == $datetime_check{$check}) {
-            my @return = $self->_local_croak("Datetime '$check' does not match ('$datetime_check{$check}' vs. '".$dt->$check."') for $datetime_initial");
-            return @return
-                if scalar @return;
-        }   
+            return $self->_local_croak("Datetime '$check' does not match ('$datetime_check{$check}' vs. '".$dt->$check."') for '$datetime_initial'");
+        }
     }
 
     return $dt;
@@ -903,11 +901,14 @@ sub _local_croak {
     
     $self->{errmsg} = $message;
 
-    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
+    return &{$self->{on_error}}($self,$message,@_) 
+        if ref($self->{on_error}) eq 'CODE';
     
-    die($message) if $self->{on_error} eq 'croak';
+    die($message) 
+        if $self->{on_error} eq 'croak';
     
-    return undef if ($self->{on_error} eq 'undef');
+    return undef 
+        if ($self->{on_error} eq 'undef');
     
     return;
 }
@@ -920,11 +921,14 @@ sub _local_carp {
 
     $self->{errmsg} = $message;
 
-    return &{$self->{on_error}}($self,$message,@_) if ref($self->{on_error});
+    return &{$self->{on_error}}($self,$message,@_) 
+        if ref($self->{on_error}) eq 'CODE';
 
-    warn($message) if $self->{on_error} eq 'croak';
+    warn($message) 
+        if $self->{on_error} eq 'croak';
     
-    return undef if ($self->{on_error} eq 'undef');
+    return undef 
+        if ($self->{on_error} eq 'undef');
     
     return;
 }
