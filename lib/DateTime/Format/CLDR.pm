@@ -19,7 +19,7 @@ our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
 our $AUTHORITY = 'cpan:MAROS';
-our $VERSION = version->new("1.09");
+our $VERSION = version->new("1.10");
 
 # Simple regexp blocks
 our %PARTS = (
