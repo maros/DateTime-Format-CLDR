@@ -349,11 +349,10 @@ Get/set pattern. See L<DateTime/"CLDR Patterns"> for details about patterns.
 =cut
 
 sub pattern {
-    my $self = shift;
-    my $pattern = shift;
+    my ($self,$pattern) = @_;
     
     # Set pattern
-    if ($pattern) {
+    if (defined $pattern) {
         $self->{pattern} = $pattern;
         undef $self->{_built_pattern};
     }
@@ -370,11 +369,10 @@ Accepts either a timezone name or a C<DateTime::TimeZone> object.
 =cut
 
 sub time_zone {
-    my $self = shift;
-    my $time_zone = shift;
+    my ($self,$time_zone) = @_;
     
     # Set timezone
-    if ($time_zone) {
+    if (defined $time_zone) {
         if (ref $time_zone
             && $time_zone->isa('DateTime::TimeZone')) {
             $self->{time_zone} = $time_zone;
@@ -396,11 +394,10 @@ Accepts either a locale name or a C<DateTime::Locale::*> object.
 =cut
 
 sub locale {
-    my $self = shift;
-    my $locale = shift;
+    my ($self,$locale) = @_;
     
     # Set locale
-    if ($locale) {
+    if (defined $locale) {
         unless (ref $locale
             && $locale->isa('DateTime::Locale::Base')) {
             $self->{locale} = DateTime::Locale->load( $locale )
@@ -439,11 +436,10 @@ Run the given coderef on error.
 =cut
 
 sub on_error {
-    my $self = shift;
-    my $on_error = shift;
+    my ($self,$on_error) = @_;
     
     # Set locale
-    if ($on_error) {
+    if (defined $on_error) {
         die("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
             unless ref($on_error) eq 'CODE'
                 or $on_error eq 'croak'
@@ -463,7 +459,7 @@ Accepts the following values
 
 =item * '1' (default)
 
-Sets the missing values to '1'. Thus if you only parse a time you would
+Sets the missing values to '1'. Thus if you only parse a time sting you would
 get '0001-01-01' as the date.
 
 =item * 'incomplete'
@@ -475,18 +471,17 @@ Create a L<DateTime::Incomplete> object instead.
 Run the given coderef on incomplete values. The code reference will be
 called with the C<DateTime::Format::CLDR> object and a hash of parsed values
 as supplied to C<DateTime-E<gt>new>. It should return a modified hash which
-will be passed to C<DateTine-E<gt>new>.
+will be passed to C<DateTine-E<gt>new>. 
 
 =back
 
 =cut
 
 sub incomplete {
-    my $self = shift;
-    my $incomplete = shift;
+    my ($self,$incomplete) = @_;
     
     # Set locale
-    if ($incomplete) {
+    if (defined $incomplete) {
         die("The value supplied to incomplete must be either 'incomplete', '1' or a code reference.")
             unless ref($incomplete) eq 'CODE'
                 or $incomplete eq '1'
@@ -732,7 +727,7 @@ sub format_datetime {
 
  my $string = $cldr->errmsg();
 
-Stores the last error message. Usefull if the on_error behavior of the 
+Stores the last error message. Especially useful if the on_error behavior of the 
 object is 'undef', so you can work out why things went wrong.
 
 =cut
@@ -748,6 +743,7 @@ There are no methods exported by default, however the following are available:
 
 =head3 cldr_format
 
+ use DateTime::Format::CLDR qw(cldr_format);
  &cldr_format($pattern,$datetime);
 
 =cut
@@ -760,9 +756,10 @@ sub cldr_format {
 
 =head3 cldr_parse
 
- &cldr_format($pattern,$string);
+ use DateTime::Format::CLDR qw(cldr_parse);
+ &cldr_parse($pattern,$string);
  OR
- &cldr_format($pattern,$string,$locale);
+ &cldr_parse($pattern,$string,$locale);
  
 Default locale is 'en'.
 
@@ -788,7 +785,7 @@ sub cldr_parse {
 # by parse_datetime
 
 sub _build_pattern {
-    my $self = shift;
+    my ($self) = @_;
     
     # Return cached pattern
     return $self->{_built_pattern}
@@ -873,6 +870,7 @@ sub _build_pattern {
 
 sub _quoteslist {
     my ($list) = @_;
+    
     return  
         '('.
         (join 
@@ -896,8 +894,7 @@ sub _quotestring {
 # Error
 
 sub _local_croak {
-    my $self = shift;
-    my $message = shift;
+    my ($self,$message) = @_;
     
     $self->{errmsg} = $message;
 
@@ -916,9 +913,8 @@ sub _local_croak {
 # Warning
 
 sub _local_carp {
-    my $self = shift;
-    my $message = shift;
-
+    my ($self,$message) = @_;
+    
     $self->{errmsg} = $message;
 
     return &{$self->{on_error}}($self,$message,@_) 
@@ -1277,7 +1273,7 @@ software company I run with Koki and Domm (L<http://search.cpan.org/~domm/>).
 
 =head1 COPYRIGHT
 
-DateTime::Format::CLDR is Copyright (c) 2008 Maroš Kollár 
+DateTime::Format::CLDR is Copyright (c) 2008-2010 Maroš Kollár 
 - L<http://www.revdev.at>
 
 This program is free software; you can redistribute it and/or modify it under 
