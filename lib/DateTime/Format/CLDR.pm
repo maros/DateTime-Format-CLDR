@@ -224,33 +224,45 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
 
     use DateTime::Format::CLDR;
     
-    my $cldr = new DateTime::Format::CLDR(
+    # 1. Basic example
+    my $cldr1 = new DateTime::Format::CLDR(
         pattern     => 'HH:mm:ss',
         locale      => 'de_AT',
         time_zone   => 'Europe/Vienna',
     );
     
-    my $dt = $cldr->parse_datetime('23:16:42');
+    my $dt1 = $cldr1->parse_datetime('23:16:42');
     
-    $cldr->format_datetime($dt);
+    print $cldr1->format_datetime($dt1);
     # 23:16:42
     
-    # Get pattern from selected locale
-    my $cldr = new DateTime::Format::CLDR(
+    # 2. Get pattern from selected locale
+    # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
+    my $cldr2 = new DateTime::Format::CLDR(
         locale      => 'de_AT',
     );
     
-    # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
-    my $dt = $cldr->parse_datetime('23.11.2007');
+    print $cldr2->parse_datetime('23.11.2007');
+    # 2007-11-23T00:00:00
     
-    # Croak when things go wrong:
-    my $cldr = new DateTime::Format::CLDR(
+    # 3. Croak when things go wrong
+    my $cldr3 = new DateTime::Format::CLDR(
         locale      => 'de_AT',
         on_error    => 'croak',
     );
     
-    # This will croak
-    $cldr->parse_datetime('23.33.2007');
+    $cldr3->parse_datetime('23.33.2007');
+    # Croaks
+    
+    # 4. Use DateTime::Locale
+    my $locale = DateTime::Locale->load('en_GB');
+    my $cldr4 = new DateTime::Format::CLDR(
+        pattern     => $locale->datetime_format_medium,
+        locale      => $locale,
+    );
+    
+    print $cldr4->parse_datetime('22 Dec 1995 09:05:02');
+    # 1995-12-22T09:05:02
 
 =head1 DESCRIPTION
 
@@ -344,7 +356,15 @@ sub new {
 
 =head3 pattern
 
-Get/set pattern. See L<DateTime/"CLDR Patterns"> for details about patterns.
+Get/set CLDR pattern. See L<"CLDR PATTERNS"> or L<DateTime/"CLDR Patterns"> 
+for details about patterns.
+
+ $cldr->pattern('d MMM y HH:mm:ss');
+
+It is possible to retrieve patterns from L<DateTime::Locale>
+ 
+ $dl = DateTime::Locale->load('es_AR');
+ $cldr->pattern($dl->datetime_format_full);
 
 =cut
 
@@ -365,6 +385,11 @@ sub pattern {
 Get/set time_zone. Returns a C<DateTime::TimeZone> object.
 
 Accepts either a timezone name or a C<DateTime::TimeZone> object.
+
+ $cldr->time_zone('America/Argentina/Mendoza');
+ OR
+ my $tz = DateTime::TimeZone->new(name => 'America/Argentina/Mendoza');
+ $cldr->time_zone($tz);
 
 =cut
 
@@ -390,6 +415,11 @@ sub time_zone {
 Get/set a locale. Returns a C<DateTime::Locale> object.
 
 Accepts either a locale name or a C<DateTime::Locale::*> object.
+
+ $cldr->locale('fr_CA');
+ OR  
+ $dl = DateTime::Locale->load('fr_CA');
+ $cldr->pattern($dl);
 
 =cut
 
