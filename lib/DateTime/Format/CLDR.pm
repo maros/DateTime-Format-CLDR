@@ -21,6 +21,9 @@ our @EXPORT = ();
 our $AUTHORITY = 'cpan:MAROS';
 our $VERSION = version->new("1.10");
 
+# Default format if none is set
+our $DEFAULT_FORMAT = 'date_format_medium';
+
 # Simple regexp blocks
 our %PARTS = (
     year_long   => qr/(-?\d{1,4})/o,
@@ -341,8 +344,14 @@ sub new {
     $self->time_zone($args{time_zone});
     $self->locale($args{locale});
     
-    # Set default values  
-    $args{pattern} ||= $self->locale->date_format_medium;
+    # Set default values
+    unless (defined $args{pattern}) {
+        if ($self->locale->can($DEFAULT_FORMAT)) {
+            $args{pattern} = $self->locale->$DEFAULT_FORMAT;
+        } else {
+            die("Method '$DEFAULT_FORMAT' not available in ".ref($self->loclale));
+        }
+    }
     
     $self->pattern($args{pattern});
     $self->on_error($args{on_error});
