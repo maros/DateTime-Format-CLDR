@@ -1,6 +1,6 @@
 # -*- perl -*-
 
-# t/010_patterns.t - check various patterns
+# t/016_case.t - check case insensitive date formats
 
 use strict;
 use warnings;

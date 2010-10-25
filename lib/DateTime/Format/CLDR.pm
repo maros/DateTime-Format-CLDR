@@ -576,7 +576,7 @@ sub parse_datetime {
                 my $count = 1;
                 my $tmpcapture;
                 foreach my $element (@{$self->{locale}->$function}) {
-                    if (lc $element eq lc $capture) {
+                    if (lc($element) eq lc($capture)) {
                         if (defined $tmpcapture) {
                             $self->_local_carp("Expression '$capture' is ambigous for pattern '$command$index' ");
                             next PART;
