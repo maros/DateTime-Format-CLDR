@@ -8,8 +8,8 @@ perl_version    '5.008';
 
 # Define metadata
 name            'DateTime-Format-CLDR';
-all_from        $from;
-#readme_from     $from;
+all_from       $from;
+readme_from     $from;
 #readme_markdown_from $from;
 
 # Specific dependencies
