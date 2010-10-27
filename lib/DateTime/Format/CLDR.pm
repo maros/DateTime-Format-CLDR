@@ -19,7 +19,7 @@ our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
 our $AUTHORITY = 'cpan:MAROS';
-our $VERSION = version->new("1.11");
+our $VERSION = version->new("1.12");
 
 # Default format if none is set
 our $DEFAULT_FORMAT = 'date_format_medium';

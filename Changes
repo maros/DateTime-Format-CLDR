@@ -1,5 +1,8 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.12 Wed Oct 27 2010
+    - Fix broken Makefile.PL
+
 1.11 Mon Oct 25 2010
     - Case insensitive pattern matching (Andrew Rodland)
 

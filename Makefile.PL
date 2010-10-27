@@ -1,6 +1,6 @@
 # Load the Module::Install bundled in ./inc/
 use strict;
-use inc::Module::Install;
+use inc::Module::Install 0.92;
 
 my $from = 'lib/DateTime/Format/CLDR.pm';
 
@@ -26,6 +26,9 @@ build_requires  'Test::Exception'           => 0;
 build_requires  'Test::NoWarnings'          => 0;
 build_requires  'Test::Warn'                => 0;
 build_requires  'Test::Simple'              => '0.82';
+
+author_requires 'Module::Install::ReadmeMarkdownFromPod'=> 0;
+author_requires 'Module::Install::ReadmeFromPod'        => 0;
 
 repository 'git://github.com/maros/DateTime-Format-CLDR.git';
 
