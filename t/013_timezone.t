@@ -36,10 +36,6 @@ my @patterns = qw(
 #Z => +0000
 #ZZZZ => WET+0000
 
-
-
-
-
 foreach my $timezone (@timezones) {
     explain("Running tests for timezone '$timezone'");
     
@@ -60,7 +56,7 @@ foreach my $timezone (@timezones) {
         );
         
         while ($dt->dmy('.') eq '10.05.2009') {
-            my $parsed = testlib::compare($dtf,$dt);
+            my $parsed = testlib::compare($dtf,$dt,"Timezone $timezone with pattern $pattern ok");
             $dt->add( hours => 1, minutes => 2 );
             if ($pattern eq 'zzzz') {
                 my $timezone_class = $timezone;

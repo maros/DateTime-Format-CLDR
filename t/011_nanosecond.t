@@ -44,9 +44,9 @@ for my $count (0..8) {
         nanosecond  => $nano,
     });
     
-    testlib::compare($dtf1,$dt);
-    testlib::compare($dtf2,$dt);
-    testlib::compare($dtf3,$dt)
+    testlib::compare($dtf1,$dt,'Pattern '.$dtf1->pattern.' ok');
+    testlib::compare($dtf2,$dt,'Pattern '.$dtf2->pattern.' ok');
+    testlib::compare($dtf3,$dt,'Pattern '.$dtf3->pattern.' ok')
         if $count >= 7;
 }
 

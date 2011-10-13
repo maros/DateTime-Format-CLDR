@@ -38,15 +38,15 @@ my $datetime;
 
 $datetime = $cldr->parse_datetime('HASE');
 
-is($datetime,undef);
+is($datetime,undef,'Returned undef');
 
 $datetime = $cldr->parse_datetime('Jun 31 , 2008');
 
-is($datetime,undef);
+is($datetime,undef,'Returned undef');
 
 $datetime = $cldr->parse_datetime('Xer 12 , 2008');
 
-is($datetime,undef);
+is($datetime,undef,'Returned undef');
 
 
 my $cldr2 = DateTime::Format::CLDR->new(
@@ -87,7 +87,7 @@ throws_ok {
     $cldr4->parse_datetime('29.02.2009');
 } qr/Could not get datetime for/;
 
-like($cldr4->errmsg,qr/Could not get datetime for/);
+like($cldr4->errmsg,qr/Could not get datetime for/,'Error message ok');
 
 my $cldr5 = DateTime::Format::CLDR->new(
     on_error    => 'croak',
@@ -127,4 +127,4 @@ $cldr = DateTime::Format::CLDR->new(
 
 my $dt = $cldr->parse_datetime( 'Jan 3, 10 Friday' );
 
-is($dt,undef);
+is($dt,undef,'Returned undef');

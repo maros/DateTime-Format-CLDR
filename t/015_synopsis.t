@@ -26,7 +26,7 @@ my $cldr1 = new DateTime::Format::CLDR(
 isa_ok($cldr1,'DateTime::Format::CLDR');
 my $dt1 = $cldr1->parse_datetime('23:16:42');
 isa_ok($dt1,'DateTime');
-is($cldr1->format_datetime($dt1),'23:16:42');
+is($cldr1->format_datetime($dt1),'23:16:42','Time formated ok');
 
 # Get pattern from selected locale
 # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
@@ -36,7 +36,7 @@ my $cldr2 = new DateTime::Format::CLDR(
 
 my $dt2 = $cldr2->parse_datetime('23.11.2007');
 isa_ok($dt2,'DateTime');
-is($dt2->iso8601,'2007-11-23T00:00:00');
+is($dt2->iso8601,'2007-11-23T00:00:00','DateTime formated ok');
 
 # Croak when things go wrong
 my $cldr3 = new DateTime::Format::CLDR(
@@ -47,7 +47,7 @@ isa_ok($cldr3,'DateTime::Format::CLDR');
 eval {
     $cldr3->parse_datetime('23.33.2007');
 };
-like($@,qr/23\.33\.2007:/);
+like($@,qr/23\.33\.2007:/,'Error message ok');
 
 # Use DateTime::Locale
 my $locale4 = DateTime::Locale->load('en_GB');
@@ -59,4 +59,4 @@ my $cldr4 = new DateTime::Format::CLDR(
 isa_ok($cldr4,'DateTime::Format::CLDR');
 my $dt4 = $cldr4->parse_datetime('22 Dec 1995 09:05:02');
 isa_ok($dt4,'DateTime');
-is($dt4->iso8601,'1995-12-22T09:05:02');
+is($dt4->iso8601,'1995-12-22T09:05:02','Time parsed ok');

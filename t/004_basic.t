@@ -29,7 +29,7 @@ $cldr->locale(DateTime::Locale->load( 'de_DE' ));
 
 isa_ok($cldr->locale,'DateTime::Locale::de_DE','Locale has been set');
 
-is($cldr->pattern,'dd.MM.yyyy');
+is($cldr->pattern,'dd.MM.yyyy','Pattern set ok');
 
 my $datetime = $cldr->parse_datetime('22.11.2011');
 
