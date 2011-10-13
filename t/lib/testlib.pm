@@ -3,8 +3,7 @@ package testlib;
 use Test::More;
 
 sub compare {
-    my $dtf = shift;
-    my $dt = shift;
+    my ($dtf,$dt,$name) = @_;
 
     my $dts = $dtf->format_datetime($dt);
  
@@ -42,7 +41,7 @@ sub compare {
             )
         );
     }  else {
-        ok('Successfully compared datetime');
+        pass($name // 'Successfully compared datetime');
     }
 
     return $dtc;
