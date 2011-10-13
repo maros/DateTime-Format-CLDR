@@ -428,7 +428,7 @@ Accepts either a locale name or a C<DateTime::Locale::*> object.
  $cldr->locale('fr_CA');
  OR  
  $dl = DateTime::Locale->load('fr_CA');
- $cldr->pattern($dl);
+ $cldr->locale($dl);
 
 =cut
 
@@ -510,7 +510,7 @@ Create a L<DateTime::Incomplete> object instead.
 Run the given coderef on incomplete values. The code reference will be
 called with the C<DateTime::Format::CLDR> object and a hash of parsed values
 as supplied to C<DateTime-E<gt>new>. It should return a modified hash which
-will be passed to C<DateTine-E<gt>new>. 
+will be passed to C<DateTime-E<gt>new>. 
 
 =back
 
@@ -1251,12 +1251,12 @@ The time zone long name.
 
 =item * Z{1,3}
 
-The time zone short name and the offset as one string, so something
-like "CDT-0500".
+The time zone offset.
 
 =item * ZZZZ
 
-The time zone long name.
+The time zone short name and the offset as one string, so something like 
+"CDT-0500".
 
 =item * v{1,3}
 
