@@ -1,25 +1,29 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.13 Thu Oct 13 2011
+    - Fixed documentation for timezone patterns, rt71602 (reported by Christopher J. Madsen)
+    - Make tests more verbose
+
 1.12 Wed Oct 27 2010
     - Fix broken Makefile.PL
 
 1.11 Mon Oct 25 2010
-    - Case insensitive pattern matching (Andrew Rodland)
+    - Case insensitive pattern matching (reported & fixed by Andrew Rodland)
 
 1.10 Thu Jan 21 2010
-    - Fixed bug rt53849 (Ozum Eldogan)
+    - Fixed bug rt53849 (reported by Ozum Eldogan)
 
 1.09 Fri Sep 18 2008
     - Added support for non 4-digit years and BC dates
     - More tests
-    - Fixed bug rt49605 (Bernhard Graf)
+    - Fixed bug rt49605 (reported by Bernhard Graf)
     - Require latest DateTime::TimeZone to avoid test fails
     - Handle era, throw error if things go really wrong
 
 1.08 Sun May 10 2009
     - Show more information if tests fail
-    - Run less extended tests (Adam Kennedy)
-    - Updated module dependencies (DateTime)
+    - Run less extended tests (reported by Adam Kennedy)
+    - Updated DateTime module dependencies
     - More testcases: Export, Exeption, Timezone
     - Fixed bugs in 'c','e' and 'ZZZZ' patterns
     - Total Test coverage is 90% (statement coverage 97%)
@@ -44,12 +48,12 @@ Revision history for Perl module DateTime::Format::CLDR
     - Added missing build dependency to Makefile.PL
 
 1.03 Thu Feb 24 2009
-    - Fixed bug RT43381 (Evan Carroll)
+    - Fixed bug RT43381 (reported by Evan Carroll)
     - Customizable handling of incomplete formats
     - Some more tests
 
 1.02 Thu Dec 05 2008
-    - Fixed bug RT41392 (Senthilvel Rangaswamy)
+    - Fixed bug RT41392 (reported by Senthilvel Rangaswamy)
     - Better and customizable exception handling
     
 1.01 Wed Jul 16 2008
