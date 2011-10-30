@@ -7,7 +7,6 @@ use utf8;
 
 #use Carp;
 
-use version;
 use DateTime;
 use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
@@ -19,7 +18,7 @@ our @EXPORT_OK = qw( cldr_format cldr_parse );
 our @EXPORT = ();
 
 our $AUTHORITY = 'cpan:MAROS';
-our $VERSION = version->new("1.13");
+our $VERSION = "1.13";
 
 # Default format if none is set
 our $DEFAULT_FORMAT = 'date_format_medium';
