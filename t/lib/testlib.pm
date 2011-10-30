@@ -41,7 +41,7 @@ sub compare {
             )
         );
     }  else {
-        pass($name // 'Successfully compared datetime');
+        pass($name || 'Successfully compared datetime');
     }
 
     return $dtc;
