@@ -1296,30 +1296,6 @@ L<http://rt.cpan.org/Public/Bug/Report.html?Queue=DateTime::Format::CLDR>.
 I will be notified and then you'll automatically be notified of the progress 
 on your report as I make changes.
 
-=head1 AUTHOR
-
-    Maroš Kollár
-    CPAN ID: MAROS
-    maros [at] k-1.com
-    
-    L<http://www.revdev.at>
-
-=head1 ACKNOWLEDGEMENTS 
-
-This module was written for Revdev L<http://www.revdev.at>, a nice litte
-software company I run with Koki and Domm (L<http://search.cpan.org/~domm/>).
-
-=head1 COPYRIGHT
-
-DateTime::Format::CLDR is Copyright (c) 2008-2010 Maroš Kollár 
-- L<http://www.revdev.at>
-
-This program is free software; you can redistribute it and/or modify it under 
-the same terms as Perl itself.
-
-The full text of the license can be found in the
-LICENSE file included with this module.
-
 =head1 SEE ALSO
 
 datetime@perl.org mailing list
@@ -1328,5 +1304,23 @@ L<http://datetime.perl.org/>
 
 L<DateTime>, L<DateTime::Locale>, L<DateTime::TimeZone> 
 and L<DateTime::Format::Strptime>
+
+=head1 AUTHOR
+
+    Maroš Kollár
+    CPAN ID: MAROS
+    maros [at] k-1.com
+    
+    http://www.k-1.com
+
+=head1 COPYRIGHT
+
+DateTime::Format::CLDR is Copyright (c) 2008-2012 Maroš Kollár 
+- L<http://www.k-1.com>
+
+=head1 LICENCE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut

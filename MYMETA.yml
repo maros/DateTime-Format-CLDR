@@ -1,0 +1,38 @@
+---
+abstract: 'Parse and format CLDR time patterns'
+author:
+  - 'Maroš Kollár'
+build_requires:
+  Exporter: 0
+  ExtUtils::MakeMaker: 6.59
+  Test::Exception: 0
+  Test::NoWarnings: 0
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
+  Test::Simple: 0.82
+  Test::Warn: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.59
+dynamic_config: 0
+generated_by: 'Module::Install version 1.06, CPAN::Meta::Converter version 2.120630'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: DateTime-Format-CLDR
+no_index:
+  directory:
+    - inc
+    - t
+    - xt
+requires:
+  DateTime: 0.48
+  DateTime::Incomplete: 0
+  DateTime::Locale: 0.42
+  DateTime::TimeZone: 0.95
+  Params::Validate: 0.76
+  perl: 5.008
+resources:
+  license: http://dev.perl.org/licenses/
+  repository: git://github.com/maros/DateTime-Format-CLDR.git
+version: 1.13

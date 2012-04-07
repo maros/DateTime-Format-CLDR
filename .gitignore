@@ -10,3 +10,5 @@ pm_to_blib
 MANIFEST.bak
 Makefile.old
 DateTime-Format-CLDR-*
+cover_db
+meta
