@@ -1,5 +1,10 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+1.14 Sat Nov 17 2011
+    - Do not use indirect object notation, rt80571 (reported by Timo Grodzinski)
+    - Fix failing tests on perl < 5.10
+    - Dist housekeeping
+    
 1.13 Thu Oct 13 2011
     - Fixed documentation for timezone patterns, rt71602 (reported by Christopher J. Madsen)
     - Make tests more verbose

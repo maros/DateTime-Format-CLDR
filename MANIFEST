@@ -17,7 +17,6 @@ META.yml
 MYMETA.json
 MYMETA.yml
 README
-README.mkdn
 t/001_load.t
 t/002_pod.t
 t/003_podcoverage.t
