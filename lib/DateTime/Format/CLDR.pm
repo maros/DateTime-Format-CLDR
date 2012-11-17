@@ -227,7 +227,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     use DateTime::Format::CLDR;
     
     # 1. Basic example
-    my $cldr1 = new DateTime::Format::CLDR(
+    my $cldr1 = DateTime::Format::CLDR->new(
         pattern     => 'HH:mm:ss',
         locale      => 'de_AT',
         time_zone   => 'Europe/Vienna',
@@ -240,7 +240,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     
     # 2. Get pattern from selected locale
     # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
-    my $cldr2 = new DateTime::Format::CLDR(
+    my $cldr2 = DateTime::Format::CLDR->new(
         locale      => 'de_AT',
     );
     
@@ -248,7 +248,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     # 2007-11-23T00:00:00
     
     # 3. Croak when things go wrong
-    my $cldr3 = new DateTime::Format::CLDR(
+    my $cldr3 = DateTime::Format::CLDR->new(
         locale      => 'de_AT',
         on_error    => 'croak',
     );
@@ -258,7 +258,7 @@ DateTime::Format::CLDR - Parse and format CLDR time patterns
     
     # 4. Use DateTime::Locale
     my $locale = DateTime::Locale->load('en_GB');
-    my $cldr4 = new DateTime::Format::CLDR(
+    my $cldr4 = DateTime::Format::CLDR->new(
         pattern     => $locale->datetime_format_medium,
         locale      => $locale,
     );
