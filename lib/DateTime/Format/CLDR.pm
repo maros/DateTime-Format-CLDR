@@ -647,7 +647,7 @@ sub parse_datetime {
             } elsif ($command eq 's') {
                 $datetime{second} = $capture;
             } elsif ($command eq 'S' ) {
-                $datetime{nanosecond} = "0.$capture" * 1000000000;
+                $datetime{nanosecond} = int("0.$capture" * 1000000000);
             } elsif ($command eq 'Z') {
                 if ($index >= 4) {
                     $capture = $2;
