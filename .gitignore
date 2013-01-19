@@ -12,3 +12,4 @@ Makefile.old
 DateTime-Format-CLDR-*
 cover_db
 meta
+MYMETA.*
