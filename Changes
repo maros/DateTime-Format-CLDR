@@ -2,6 +2,7 @@ Revision history for Perl module DateTime::Format::CLDR
 
 1.15 ?
     - Fix failing tests
+    - Touch up on t/009 to be more verbose, added homepage to Makefile.PL (Evan Carroll)
 
 1.14 Sat Nov 17 2011
     - Do not use indirect object notation, rt80571 (reported by Timo Grodzinski)

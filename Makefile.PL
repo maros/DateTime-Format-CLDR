@@ -29,5 +29,6 @@ build_requires  'Test::Simple'              => '0.82';
 author_requires 'Module::Install::ReadmeFromPod'        => 0;
 
 repository 'git://github.com/maros/DateTime-Format-CLDR.git';
+homepage 'https://github.com/maros/DateTime-Format-CLDR';
 
 WriteAll;
