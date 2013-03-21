@@ -6,8 +6,13 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::NoWarnings;
+
+BEGIN {
+	use_ok( 'DateTime::Incomplete' )
+		or BAIL_OUT( "$0 requires 'DateTime::Incomplete'\n" );
+}
 
 use DateTime::Format::CLDR;
 
