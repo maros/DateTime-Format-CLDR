@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Test::Exception;
 use Test::Warn;
 
@@ -77,6 +77,10 @@ my $cldr4 = DateTime::Format::CLDR->new(
 
 throws_ok { 
     $cldr4->parse_datetime('31.02.2009');
+} qr/Could not get datetime for/;
+
+throws_ok { 
+    $cldr4->parse_datetime('10.02.2009 000');
 } qr/Could not get datetime for/;
 
 throws_ok { 

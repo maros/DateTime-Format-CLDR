@@ -47,7 +47,7 @@ isa_ok($cldr3,'DateTime::Format::CLDR');
 eval {
     $cldr3->parse_datetime('23.33.2007');
 };
-like($@,qr/23\.33\.2007:/,'Error message ok');
+like($@,qr/23\.33\.2007/,'Error message ok');
 
 # Use DateTime::Locale
 my $locale4 = DateTime::Locale->load('en_GB');

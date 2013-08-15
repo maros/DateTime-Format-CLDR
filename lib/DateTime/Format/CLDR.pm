@@ -551,6 +551,12 @@ sub parse_datetime {
     my $datetime_initial = $string;
     my %datetime_info = ();
     my %datetime_check = ();
+    my $datetime_error = sub {
+        my $occurence = shift;
+        my $error = $datetime_initial;
+        substr($error,(length($occurence) * -1),0," HERE-->");
+        return $self->_local_croak("Could not get datetime for $datetime_initial (Error marked by 'HERE-->'): '$error'");
+    };
     
     # Set default datetime values
     my %datetime = (
@@ -573,8 +579,8 @@ sub parse_datetime {
             #print "TRY TO MATCH '$string' AGAINST '$regexp' WITH $command\n";
             
             # Match regexp part
-            return $self->_local_croak("Could not get datetime for $datetime_initial: $string")
-                unless ($string =~ s/$regexp//ix);
+            return $datetime_error->($string)
+                unless ($string =~ s/^ \s* $regexp//ix);
             
             # Get capture
             my $capture = $1;
@@ -664,20 +670,18 @@ sub parse_datetime {
             } elsif ($command eq 'z' || $command eq 'v' || $command eq 'V') {
                 $datetime{time_zone} = DateTime::TimeZone->new(name => $capture);
             } else {
-                return $self->_local_croak("Something went really wrong: Unknown pattern $command$index");
+                return $self->_local_croak("Could not get datetime for '$datetime_initial': Unknown pattern $command$index");
             }
        
         # String
-        } else {
-            return $self->_local_croak("Could not get datetime for $datetime_initial: $string")
-                unless ($string =~ s/$part//ix);
+        } elsif ($string !~ s/^ \s* $part//ix) {
+            return $datetime_error->($string);
         }
-        
         #print "BEFORE: '$before' AFTER: '$string' PATTERN: '$part'\n";
     }
     
-    return $self->_local_croak("Could not get datetime for $datetime_initial: $string") 
-        if $string;
+    return $datetime_error->($string)
+        if $string ne '';
     
     # Handle 12 hour time notations
     if (defined $datetime_info{hour12} 
@@ -715,7 +719,7 @@ sub parse_datetime {
                 if $@ || ref $dt ne 'DateTime::Incomplete';
             return $dt;
         } else {
-            return $self->_local_croak("Something went really wrong: Invalid incomplete setting");
+            return $self->_local_croak("Could not get datetime for $datetime_initial: Invalid incomplete setting");
         }
     }
     
