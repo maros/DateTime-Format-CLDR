@@ -12,10 +12,11 @@ use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
 use Params::Validate qw( validate_pos validate SCALAR BOOLEAN OBJECT CODEREF );
 use Exporter;
+use Carp qw(croak carp);
 
-our @ISA = 'Exporter';
+# Export functions
+use base qw(Exporter);
 our @EXPORT_OK = qw( cldr_format cldr_parse );
-our @EXPORT = ();
 
 our $AUTHORITY = 'cpan:MAROS';
 our $VERSION = "1.14";
@@ -348,7 +349,7 @@ sub new {
         if ($self->locale->can($DEFAULT_FORMAT)) {
             $args{pattern} = $self->locale->$DEFAULT_FORMAT;
         } else {
-            die("Method '$DEFAULT_FORMAT' not available in ".ref($self->loclale));
+            croak("Method '$DEFAULT_FORMAT' not available in ".ref($self->loclale));
         }
     }
     
@@ -411,7 +412,7 @@ sub time_zone {
             $self->{time_zone} = $time_zone;
         } else {
             $self->{time_zone} = DateTime::TimeZone->new( name => $time_zone )
-                or die("Could not create timezone from $time_zone");
+                or croak("Could not create timezone from $time_zone");
         }  
     }
     
@@ -439,7 +440,7 @@ sub locale {
         unless (ref $locale
             && $locale->isa('DateTime::Locale::Base')) {
             $self->{locale} = DateTime::Locale->load( $locale )
-                or die("Could not create locale from $locale");
+                or croak("Could not create locale from $locale");
         } else {
             $self->{locale} = $locale;
         }  
@@ -478,7 +479,7 @@ sub on_error {
     
     # Set locale
     if (defined $on_error) {
-        die("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
+        croak("The value supplied to on_error must be either 'croak', 'undef' or a code reference.")
             unless ref($on_error) eq 'CODE'
                 or $on_error eq 'croak'
                 or $on_error eq 'undef';
@@ -520,7 +521,7 @@ sub incomplete {
     
     # Set locale
     if (defined $incomplete) {
-        die("The value supplied to incomplete must be either 'incomplete', '1' or a code reference.")
+        croak("The value supplied to incomplete must be either 'incomplete', '1' or a code reference.")
             unless ref($incomplete) eq 'CODE'
                 or $incomplete eq '1'
                 or $incomplete eq 'incomplete';
@@ -707,9 +708,8 @@ sub parse_datetime {
             $datetime{year} ||= 1;
         } elsif ($self->{incomplete} eq 'incomplete') {
             require DateTime::Incomplete;
-            my $dt;
-            eval {
-                $dt = DateTime::Incomplete->new(%datetime);
+            my $dt = eval {
+                return DateTime::Incomplete->new(%datetime);
             };
             return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
                 if $@ || ref $dt ne 'DateTime::Incomplete';
@@ -720,9 +720,8 @@ sub parse_datetime {
     }
     
     # Build datetime 
-    my $dt;
-    eval {
-        $dt = DateTime->new(%datetime);
+    my $dt = eval {
+        return DateTime->new(%datetime);
     };
     return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
         if $@ || ref $dt ne 'DateTime';
@@ -771,7 +770,7 @@ object is 'undef', so you can work out why things went wrong.
 =cut
 
 sub errmsg {
-    $_[0]->{errmsg};
+    return $_[0]->{errmsg};
 }
 
 
@@ -900,7 +899,6 @@ sub _build_pattern {
         }
     }
     
-    
     return $self->{_built_pattern};
 }
 
@@ -939,7 +937,7 @@ sub _local_croak {
     return &{$self->{on_error}}($self,$message,@_) 
         if ref($self->{on_error}) eq 'CODE';
     
-    die($message) 
+    croak($message) 
         if $self->{on_error} eq 'croak';
     
     return undef 
@@ -958,7 +956,7 @@ sub _local_carp {
     return &{$self->{on_error}}($self,$message,@_) 
         if ref($self->{on_error}) eq 'CODE';
 
-    warn($message) 
+    carp($message) 
         if $self->{on_error} eq 'croak';
     
     return undef 
