@@ -153,7 +153,6 @@ our %ZONEMAP = (
   'YEKT' => '+0500',        'YST' => '-0900',          'Z' => '+0000',
 );
 
-
 # Map of CLDR commands to values
 # Value might be
 # - Regular expression: usually taken from %PART
@@ -204,6 +203,7 @@ our %PARSER = (
     H1      => $PARTS{hour_23},
     K1      => $PARTS{hour_11},
     k1      => $PARTS{hour_24},
+   #j1      => Handled dyamically,
     m1      => $PARTS{minute},
     s1      => $PARTS{second},
     S1      => $PARTS{number},
@@ -211,11 +211,10 @@ our %PARSER = (
     Z4      => $PARTS{timezone2},
     z1      => [ keys %ZONEMAP ],
     z4      => [ DateTime::TimeZone->all_names ],
-    v1      => [ keys %ZONEMAP ],
-    v4      => [ DateTime::TimeZone->all_names ],
-    V1      => [ keys %ZONEMAP ],
-    V4      => [ DateTime::TimeZone->all_names ],
 );
+$PARSER{v1} = $PARSER{V1} = $PARSER{z1};
+$PARSER{v4} = $PARSER{V4} = $PARSER{z4};
+
 
 =encoding utf8
 
@@ -642,7 +641,6 @@ sub parse_datetime {
                 $capture = 0 if $capture == 12;
                 $datetime_info{hour12} = $capture;
             } elsif ($command eq 'K') { # 0-11
-                #$capture = 12 if $capture == 0;
                 $datetime_info{hour12} = $capture;
             } elsif ($command eq 'H') { # 0-23
                 $datetime{hour} = $capture;
