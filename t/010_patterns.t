@@ -6,7 +6,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 
-use Test::More tests => 1 + (5*4) + (33 * 3) + (18 * 2);
+use Test::More tests => 1 + (6*4) + (33 * 3) + (18 * 2);
 use Test::NoWarnings;
 
 use lib qw(t/lib);
@@ -56,6 +56,7 @@ my @patterns_datetime = (
     'dd.MM.yyy KK:mm a',
     'dd.MM.yyy kk:mm',
     'dd.MM.yyy jj:mm a',
+    "dd.MM.yyy HH 'o''clock and 'mm'minutes'",
 );
 
 foreach my $pattern (@patterns_date) {
