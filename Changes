@@ -1,7 +1,10 @@
 Revision history for Perl module DateTime::Format::CLDR
 
-1.15 ?
+1.15 Thi Aug 15 2013
     - Fix failing tests
+    - Fix bad parsing of HH:mm:ss -> 24:00:00, rt87550 (reported by Gonzalo Mateo)
+    - Dist housekeeping
+    - Descriptive error messages
 
 1.14 Sat Nov 17 2011
     - Do not use indirect object notation, rt80571 (reported by Timo Grodzinski)
