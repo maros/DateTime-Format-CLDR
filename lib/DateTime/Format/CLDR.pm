@@ -5,8 +5,6 @@ use strict;
 use warnings;
 use utf8;
 
-#use Carp;
-
 use DateTime;
 use DateTime::Locale 0.4000;
 use DateTime::TimeZone;
@@ -32,7 +30,7 @@ our %PARTS = (
     day_month   => qr/(3[01]|[12]\d|0?[1-9])/o,
     day_year    => qr/([1-3]\d\d|0?[1-9]\d|(?:00)?[1-9])/o,
     month       => qr/(1[0-2]|0?[1-9])/o,
-    hour_23     => qr/(00|2[0-3]|1\d|0?\d)/o,
+    hour_23     => qr/(00|2[0-4]|1\d|0?\d)/o,
     hour_24     => qr/(2[0-4]|1\d|0?[1-9])/o,
     hour_12     => qr/(1[0-2]|0?[1-9])/o,
     hour_11     => qr/(00|1[01]|0?\d)/o,
@@ -689,6 +687,18 @@ sub parse_datetime {
             if $datetime_info{ampm} == 2 && $datetime{hour} < 12;
     }
     
+    # Handle 24:00:00 time notations
+    if ($datetime{hour} == 24) {
+        if ($datetime{minute} == 0
+            && $datetime{second} == 0
+            && $datetime{nanosecond} == 0) {
+            $datetime{hour} = 0;
+            $datetime_info{dayadd} = 1;
+        } else {
+            return $self->_local_croak("Could not get datetime for $datetime_initial: Invalid 24-hour notation") 
+        } 
+    } 
+    
     # Handle era
     if (defined $datetime_info{era} 
         && $datetime_info{era} == 0
@@ -727,6 +737,11 @@ sub parse_datetime {
     };
     return $self->_local_croak("Could not get datetime for $datetime_initial: $@")
         if $@ || ref $dt ne 'DateTime';
+    
+    # Postprocessing
+    if ($datetime_info{dayadd}) {
+        $dt->add( days => 1 );
+    }
     
     # Perform checks
     foreach my $check ( keys %datetime_check ) {
