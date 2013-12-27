@@ -644,8 +644,7 @@ sub parse_datetime {
             } elsif ($command eq 'H') { # 0-23
                 $datetime{hour} = $capture;
             } elsif ($command eq 'k') { # 1-24
-                $capture = 0 if $capture == 24;
-                $datetime{hour} = $capture;
+                $datetime_info{hour24} = $capture;
             } elsif ($command eq 'm') {
                 $datetime{minute} = $capture;
             } elsif ($command eq 's') {
@@ -686,6 +685,13 @@ sub parse_datetime {
         $datetime{hour} = $datetime_info{hour12};
         $datetime{hour} += 12
             if $datetime_info{ampm} == 2 && $datetime{hour} < 12;
+    }
+    if (defined $datetime_info{hour24}) {
+        $datetime{hour} = $datetime_info{hour24};
+        if ($datetime{hour} == 24) {
+            $datetime{hour} = 0;
+            $datetime_info{dayadd} = 1;
+        }
     }
     
     # Handle 24:00:00 time notations
