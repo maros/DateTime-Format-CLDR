@@ -1009,7 +1009,7 @@ be parsed but ignored in datetime calculation.
 
 See L<DateTime/"CLDR Patterns">.
 
-CLDR provides the following pattenrs:
+CLDR provides the following patterns:
 
 =over 4
 
