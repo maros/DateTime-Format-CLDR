@@ -46,3 +46,5 @@
 # Avoid archives of this distribution
 \bDateTime-Format-CLDR-[\d\.\_]+
 meta/
+
+MYMETA.*

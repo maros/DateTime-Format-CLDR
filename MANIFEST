@@ -18,8 +18,6 @@ MYMETA.json
 MYMETA.yml
 README
 t/001_load.t
-t/002_pod.t
-t/003_podcoverage.t
 t/004_basic.t
 t/005_extended.t
 t/006_exceptions.t
@@ -33,4 +31,9 @@ t/013_timezone.t
 t/014_bug_rt49605.t
 t/015_synopsis.t
 t/016_case.t
+t/017_bug_rt87550.t
 t/lib/testlib.pm
+xt/perlcritic.t
+xt/pod.t
+xt/podcoverage.t
+xt/podstyle.t
