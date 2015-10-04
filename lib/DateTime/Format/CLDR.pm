@@ -690,7 +690,6 @@ sub parse_datetime {
         $datetime{hour} = $datetime_info{hour24};
         if ($datetime{hour} == 24) {
             $datetime{hour} = 0;
-            $datetime_info{dayadd} = 1;
         }
     }
     
@@ -1233,7 +1232,8 @@ The hour from 0-11.
 
 =item * k{1,2}
 
-The hour from 1-24.
+The hour from 1-24. Note that hour 24 is equivalent to midnight on the date
+being parsed, not midnight of the next day.
 
 =item * j{1,2}
 

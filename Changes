@@ -1,5 +1,9 @@
 Revision history for Perl module DateTime::Format::CLDR
 
+    - Fix incorrect interpretation of hour "24" for the k patterns. This
+      should be treated as equivalent to "00", not as "00" _on the next
+      day_ (Fixed by Dave Rolsky)
+
 1.15 Thi Aug 15 2013
     - Fix failing tests
     - Fix bad parsing of HH:mm:ss -> 24:00:00, rt87550 (reported by Gonzalo Mateo)
