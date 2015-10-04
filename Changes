@@ -3,6 +3,9 @@ Revision history for Perl module DateTime::Format::CLDR
     - Fix incorrect interpretation of hour "24" for the k patterns. This
       should be treated as equivalent to "00", not as "00" _on the next
       day_ (Fixed by Dave Rolsky)
+    - Make all tests pass with both the current DateTime::Locale and the
+      upcoming new version (currently still in trial releases) (fixed by Dave
+      Rolsky)
 
 1.15 Thi Aug 15 2013
     - Fix failing tests
