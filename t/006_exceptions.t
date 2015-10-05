@@ -16,7 +16,7 @@ my $cldr = DateTime::Format::CLDR->new();
 
 throws_ok { 
     $cldr->locale('xx');
-} qr/Invalid locale name or id: xx/;
+} qr/Invalid locale (?:name or id|code or name): xx/;
 
 throws_ok { 
     $cldr->time_zone('+9999');

@@ -52,7 +52,7 @@ like($@,qr/23\.33\.2007/,'Error message ok');
 # Use DateTime::Locale
 my $locale4 = DateTime::Locale->load('en_GB');
 my $cldr4 = DateTime::Format::CLDR->new(
-    pattern     => $locale4->datetime_format_medium,
+    pattern     => 'd MMM y HH:mm:ss',
     locale      => $locale4,
 );
 

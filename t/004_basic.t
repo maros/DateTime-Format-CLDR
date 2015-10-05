@@ -18,7 +18,7 @@ my $cldr = DateTime::Format::CLDR->new(
 is($cldr->incomplete,1,'incomplete accessor');
 is($cldr->on_error,'undef','on_error accessor');
 isa_ok($cldr,'DateTime::Format::CLDR');
-isa_ok($cldr->locale,'DateTime::Locale::de_AT');
+like($cldr->locale->id,qr/de[_\-]AT/,'DateTime::Locale id is de-AT');
 isa_ok($cldr->time_zone,'DateTime::TimeZone::Floating');
 
 $cldr->time_zone(DateTime::TimeZone::UTC->new);
@@ -27,16 +27,16 @@ isa_ok($cldr->time_zone,'DateTime::TimeZone::UTC','Timezone has been set');
 
 $cldr->locale(DateTime::Locale->load( 'de_DE' ));
 
-isa_ok($cldr->locale,'DateTime::Locale::de_DE','Locale has been set');
+like($cldr->locale->id,qr/de[_\-]DE/,'Locale has been set');
 
-is($cldr->pattern,'dd.MM.yyyy','Pattern set ok');
+like($cldr->pattern,qr/dd.MM.y(?:yyy){0,1}/,'Pattern set ok');
 
 my $datetime = $cldr->parse_datetime('22.11.2011');
 
 isa_ok($datetime,'DateTime');
 is($datetime->dmy,'22-11-2011','String has been parsed');
 isa_ok($datetime->time_zone,'DateTime::TimeZone::UTC','String has correct timezone');
-isa_ok($datetime->locale,'DateTime::Locale::de_DE','String has correct locale');
+like($datetime->locale->id,qr/de[_\-]DE/,'Locale has been set');
 
 $cldr->pattern('dd.MMMM.yyyy');
 
