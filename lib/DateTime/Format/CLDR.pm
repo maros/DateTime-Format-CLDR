@@ -18,7 +18,7 @@ our @EXPORT_OK = qw( cldr_format cldr_parse );
 
 # CPAN data
 our $AUTHORITY = 'cpan:MAROS';
-our $VERSION = "1.15";
+our $VERSION = '1.16';
 
 # Default format if none is set
 our $DEFAULT_FORMAT = 'date_format_medium';
