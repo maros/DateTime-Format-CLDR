@@ -437,7 +437,7 @@ sub locale {
     # Set locale
     if (defined $locale) {
         unless (ref $locale
-            && $locale->isa('DateTime::Locale::Base')) {
+            && ($locale->isa('DateTime::Locale::Base') || $locale->isa('DateTime::Locale::FromData'))) {
             $self->{locale} = DateTime::Locale->load( $locale )
                 or croak("Could not create locale from $locale");
         } else {
