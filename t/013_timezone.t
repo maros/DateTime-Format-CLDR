@@ -16,11 +16,11 @@ use DateTime;
 use DateTime::Format::CLDR;
 
 my @timezones = qw(
-    Africa/Casablanca 
-    America/Argentina/Buenos_Aires     
-    America/Vancouver 
-    Asia/Rangoon 
-    Europe/Vienna 
+    Africa/Casablanca
+    America/Argentina/Buenos_Aires
+    America/Vancouver
+    Asia/Kabul
+    Europe/Vienna
 );
 
 my @patterns = qw(
