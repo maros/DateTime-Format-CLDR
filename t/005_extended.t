@@ -31,22 +31,21 @@ foreach my $localeid (LOCALES) {
     explain("Running tests for locale '$localeid'");
 
     my $locale = DateTime::Locale->load( $localeid );
-    
+
     foreach my $pattern (qw(
-        datetime_format_long 
-        datetime_format_full 
+        datetime_format_long
+        datetime_format_full
         datetime_format_medium
         datetime_format_short)) {
-            
-        #explain("SET LOCALE: $localeid->{id} : $pattern : ".$locale->$pattern()); 
-            
+
+        #explain("SET LOCALE: $localeid->{id} : $pattern : ".$locale->$pattern());
+
         my $dtf = DateTime::Format::CLDR->new(
             locale      => $locale,
             pattern     => $locale->$pattern(),
             time_zone   => $time_zone
-        );   
-        
-        
+        );
+
         my $dt1 = DateTime->new(
             year    => 2000,
             month   => 1,
@@ -57,7 +56,7 @@ foreach my $localeid (LOCALES) {
             time_zone=> $time_zone,
             nanosecond  => 0,
         );
-        
+
         my $dt2 = DateTime->new(
             year    => 1998,
             month   => 1,
@@ -68,7 +67,7 @@ foreach my $localeid (LOCALES) {
             time_zone=> $time_zone,
             nanosecond  => 0,
         );
-        
+
         my $dt3 = DateTime->new(
             year    => 2008,
             month   => 1,
@@ -79,18 +78,15 @@ foreach my $localeid (LOCALES) {
             time_zone=> $time_zone,
             nanosecond  => 0,
         );
-        
-        
+
         while ($dt3->year == 2008) {
             testlib::compare($dtf,$dt1);
             testlib::compare($dtf,$dt2);
             testlib::compare($dtf,$dt3);
-            
+
             $dt1->add( days => 1 );
             $dt2->add( days => 1 );
             $dt3->add( days => 1 );
         }
     }
 }
-
-

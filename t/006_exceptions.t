@@ -14,23 +14,23 @@ use DateTime::Format::CLDR;
 
 my $cldr = DateTime::Format::CLDR->new();
 
-throws_ok { 
+throws_ok {
     $cldr->locale('xx');
 } qr/Invalid locale (?:name or id|code or name): xx/;
 
-throws_ok { 
+throws_ok {
     $cldr->time_zone('+9999');
 } qr/Invalid offset: \+9999/;
 
-throws_ok { 
+throws_ok {
     $cldr->on_error('XXX');
 } qr/The value supplied to on_error must be either/;
 
-throws_ok { 
+throws_ok {
     $cldr->incomplete('XXX');
 } qr/The value supplied to incomplete must be either/;
 
-throws_ok { 
+throws_ok {
     $cldr->time_zone('Europe/Absurdistan');
 } qr/The timezone 'Europe\/Absurdistan' could not be loaded, or is an invalid name/;
 
@@ -54,7 +54,7 @@ my $cldr2 = DateTime::Format::CLDR->new(
     locale      => 'de_AT'
 );
 
-throws_ok { 
+throws_ok {
     $cldr2->parse_datetime('HASE');
 } qr/Could not get datetime for HASE/;
 
@@ -64,7 +64,7 @@ my $cldr3 = DateTime::Format::CLDR->new(
     locale      => 'de_AT'
 );
 
-throws_ok { 
+throws_ok {
     $cldr3->parse_datetime('HASE');
 } qr/LAPIN/;
 
@@ -75,19 +75,19 @@ my $cldr4 = DateTime::Format::CLDR->new(
     locale      => 'de_AT'
 );
 
-throws_ok { 
+throws_ok {
     $cldr4->parse_datetime('31.02.2009');
 } qr/Could not get datetime for/;
 
-throws_ok { 
+throws_ok {
     $cldr4->parse_datetime('10.02.2009 000');
 } qr/Could not get datetime for/;
 
-throws_ok { 
+throws_ok {
     $cldr4->parse_datetime('37.44.2009');
 } qr/Could not get datetime for/;
 
-throws_ok { 
+throws_ok {
     $cldr4->parse_datetime('29.02.2009');
 } qr/Could not get datetime for/;
 
@@ -99,7 +99,7 @@ my $cldr5 = DateTime::Format::CLDR->new(
     locale      => 'de_AT'
 );
 
-throws_ok { 
+throws_ok {
     $cldr5->parse_datetime('02.03.2009 Mittwoch');
 } qr/Datetime 'day_of_week' does not match/;
 
@@ -124,8 +124,8 @@ warning_like {
 
 
 $cldr = DateTime::Format::CLDR->new(
-    on_error=> 'undef', 
-    locale  => 'en', 
+    on_error=> 'undef',
+    locale  => 'en',
     pattern => 'MMM d, yy eeee',
 );
 

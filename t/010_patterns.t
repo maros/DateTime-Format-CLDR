@@ -80,11 +80,11 @@ foreach my $pattern (@patterns_date) {
         month   => 10,
         day     => 31,
     });
-    
+
     testlib::compare($dtf,$dt1,"Pattern $pattern for dt1 ok");
     testlib::compare($dtf,$dt2,"Pattern $pattern for dt2 ok");
     testlib::compare($dtf,$dt3,"Pattern $pattern for dt3 ok");
-    
+
     if ($pattern =~ /yyy+/) {
         my $dt4 = DateTime->new({
             year    => 600,
@@ -96,8 +96,8 @@ foreach my $pattern (@patterns_date) {
             month   => 10,
             day     => 31,
         });
-        
-    
+
+
         testlib::compare($dtf,$dt4);
         testlib::compare($dtf,$dt5);
     }
@@ -137,7 +137,7 @@ foreach my $pattern (@patterns_datetime) {
         hour    => 23,
         minute  => 45,
     });
-    
+
     testlib::compare($dtf,$dt1,"Pattern $pattern for dt1 ok");
     testlib::compare($dtf,$dt2,"Pattern $pattern for dt2 ok");
     testlib::compare($dtf,$dt3,"Pattern $pattern for dt3 ok");

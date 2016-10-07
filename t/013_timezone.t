@@ -29,8 +29,7 @@ my @patterns = qw(
     z
     zzzz
 );
-#
-#
+
 #z,v,V => WET
 #zzzz,vvvv,VVVV => Africa/Casablanca
 #Z => +0000
@@ -38,14 +37,14 @@ my @patterns = qw(
 
 foreach my $timezone (@timezones) {
     explain("Running tests for timezone '$timezone'");
-    
+
     foreach my $pattern (@patterns) {
         my $dtf = DateTime::Format::CLDR->new(
             locale      => 'en_US',
             pattern     => 'dd.MM.yyy HH:mm ' . $pattern,
             on_error    => 'croak',
         );
-        
+
         my $dt = DateTime->new(
             year        => 2009,
             month       => 5,
@@ -54,7 +53,7 @@ foreach my $timezone (@timezones) {
             minute      => 0,
             time_zone   => $timezone,
         );
-        
+
         while ($dt->dmy('.') eq '10.05.2009') {
             my $parsed = testlib::compare($dtf,$dt,"Timezone $timezone with pattern $pattern ok");
             $dt->add( hours => 1, minutes => 2 );
@@ -66,4 +65,3 @@ foreach my $timezone (@timezones) {
         }
     }
 }
-

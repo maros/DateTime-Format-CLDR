@@ -36,9 +36,8 @@ my @tests = (
 foreach my $test (@tests) {
     my $format = DateTime::Format::CLDR->new(
         pattern     => $test->{pattern},
-        on_error    => 'croak',    
+        on_error    => 'croak',
     );
     my $year = $format->parse_datetime($test->{value})->year;
     is($year,$test->{result},'Parsed year is '.$test->{result});
 }
-

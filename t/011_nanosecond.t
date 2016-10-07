@@ -35,7 +35,7 @@ for my $count (0..5) {
     my $nano = int(10 ** $count);
     $nano = 0
         if $nano == 1;
-    
+
     my $dt = DateTime->new({
         year        => 2000,
         month       => 1,
@@ -45,15 +45,7 @@ for my $count (0..5) {
         second      => 20,
         nanosecond  => $nano,
     });
-    
+
     testlib::compare($dtf1,$dt,'Pattern '.$dtf1->pattern.' ok');
     testlib::compare($dtf2,$dt,'Pattern '.$dtf2->pattern.' ok');
 }
-
-
-
-
-
-    
- 
-    
