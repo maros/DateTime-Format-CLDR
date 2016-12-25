@@ -6,13 +6,13 @@ sub compare {
     my ($dtf,$dt,$name) = @_;
 
     my $dts = $dtf->format_datetime($dt);
- 
+
     my $dtc = $dtf->parse_datetime($dts);
-    
-    my $timezone = $dt->time_zone->name;  
+
+    my $timezone = $dt->time_zone->name;
     my $locale = $dt->locale->id;
-    my $nanosecond = $dt->nanosecond(); 
-      
+    my $nanosecond = $dt->nanosecond();
+
     unless($dtc && ref $dtc && $dtc->isa('DateTime')) {
 
         fail(join ("\n",
@@ -23,11 +23,11 @@ sub compare {
             "Locale: '$locale'",
             "Error: ".$dtf->errmsg,
             )
-        );   
-         
+        );
+
         return;
     }
-    
+
     unless ( DateTime->compare_ignore_floating( $dtc, $dt ) == 0) {
         my $nanosecondc = $dtc->nanosecond;
         my $timezonec = $dtc->time_zone->name;
