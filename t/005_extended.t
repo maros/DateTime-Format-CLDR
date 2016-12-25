@@ -12,7 +12,7 @@ use testlib;
 
 BEGIN {
     use constant LOCALES => qw(ar en ru);
-    use Test::More tests => 2 + (366 * 3 * 4 * 3) ;
+    use Test::More tests => 2 + (366 * 2 * 4 * 3) ;
 }
 use Test::NoWarnings;
 
@@ -47,17 +47,6 @@ foreach my $localeid (LOCALES) {
         );
 
         my $dt1 = DateTime->new(
-            year    => 2000,
-            month   => 1,
-            day     => 1,
-            hour    => 01,
-            minute  => 14,
-            locale  => $locale,
-            time_zone=> $time_zone,
-            nanosecond  => 0,
-        );
-
-        my $dt2 = DateTime->new(
             year    => 1998,
             month   => 1,
             day     => 1,
@@ -68,7 +57,7 @@ foreach my $localeid (LOCALES) {
             nanosecond  => 0,
         );
 
-        my $dt3 = DateTime->new(
+        my $dt2 = DateTime->new(
             year    => 2008,
             month   => 1,
             day     => 1,
@@ -79,14 +68,13 @@ foreach my $localeid (LOCALES) {
             nanosecond  => 0,
         );
 
-        while ($dt3->year == 2008) {
+        while ($dt2->year == 2008) {
             testlib::compare($dtf,$dt1);
             testlib::compare($dtf,$dt2);
-            testlib::compare($dtf,$dt3);
+            #testlib::compare($dtf,$dt3);
 
             $dt1->add( days => 1 );
             $dt2->add( days => 1 );
-            $dt3->add( days => 1 );
         }
     }
 }
