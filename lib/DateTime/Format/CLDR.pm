@@ -324,7 +324,7 @@ See L<incomplete> accessor.
 
 =cut
 
-sub new {
+sub new { ## no perlcritic(RequireArgUnpacking)
     my $class = shift;
     my %args = validate( @_, {
         locale          => { type => SCALAR | OBJECT, default => 'en' },
@@ -543,7 +543,7 @@ an error will be thrown (depending on the C<on_error> attribute).
 
 =cut
 
-sub parse_datetime {
+sub parse_datetime { ## no perlcritic(RequireArgUnpacking)
     my ( $self, $string ) = validate_pos( @_, 1, { type => SCALAR  } );
 
     my $pattern = $self->_build_pattern();
