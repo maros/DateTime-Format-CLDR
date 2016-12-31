@@ -3,44 +3,44 @@ NAME
 
 SYNOPSIS
         use DateTime::Format::CLDR;
-    
+
         # 1. Basic example
         my $cldr1 = DateTime::Format::CLDR->new(
             pattern     => 'HH:mm:ss',
             locale      => 'de_AT',
             time_zone   => 'Europe/Vienna',
         );
-    
+
         my $dt1 = $cldr1->parse_datetime('23:16:42');
-    
+
         print $cldr1->format_datetime($dt1);
         # 23:16:42
-    
+
         # 2. Get pattern from selected locale
         # pattern is taken from 'date_format_medium' in DateTime::Locale::de_AT
         my $cldr2 = DateTime::Format::CLDR->new(
             locale      => 'de_AT',
         );
-    
+
         print $cldr2->parse_datetime('23.11.2007');
         # 2007-11-23T00:00:00
-    
+
         # 3. Croak when things go wrong
         my $cldr3 = DateTime::Format::CLDR->new(
             locale      => 'de_AT',
             on_error    => 'croak',
         );
-    
+
         $cldr3->parse_datetime('23.33.2007');
         # Croaks
-    
+
         # 4. Use DateTime::Locale
         my $locale = DateTime::Locale->load('en_GB');
         my $cldr4 = DateTime::Format::CLDR->new(
             pattern     => $locale->datetime_format_medium,
             locale      => $locale,
         );
-    
+
         print $cldr4->parse_datetime('22 Dec 1995 09:05:02');
         # 1995-12-22T09:05:02
 
@@ -120,7 +120,7 @@ METHODS
     Accepts either a locale name or a "DateTime::Locale::*" object.
 
      $cldr->locale('fr_CA');
-     OR  
+     OR
      $dl = DateTime::Locale->load('fr_CA');
      $cldr->locale($dl);
 
@@ -504,9 +504,9 @@ CAVEATS
     Quote from the Author of "DateTime::Format::Strptime" which also applies
     to this module:
 
-     "If your module uses this module to parse a known format: stop it. This module 
-     is clunky and slow because it can parse almost anything. Parsing a known 
-     format is not so difficult, is it? You'll make your module faster if you do. 
+     "If your module uses this module to parse a known format: stop it. This module
+     is clunky and slow because it can parse almost anything. Parsing a known
+     format is not so difficult, is it? You'll make your module faster if you do.
      And you're not left at the whim of my potentially broken code."
 
 SUPPORT
@@ -528,7 +528,7 @@ AUTHOR
         Maroš Kollár
         CPAN ID: MAROS
         maros [at] k-1.com
-    
+
         http://www.k-1.com
 
 COPYRIGHT

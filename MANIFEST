@@ -31,6 +31,7 @@ t/015_synopsis.t
 t/016_case.t
 t/017_bug_rt87550.t
 t/018_bug_rt89846.t
+t/019_bug_rt107389.t
 t/lib/testlib.pm
 xt/perlcritic.t
 xt/pod.t
