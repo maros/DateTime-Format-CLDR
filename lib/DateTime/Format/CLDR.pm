@@ -208,11 +208,11 @@ our %PARSER = (
     m1      => $PARTS{minute},
     s1      => $PARTS{second},
     S1      => $PARTS{number}, #!
-    Z1      => [ grep { $_ ne 'Ambiguous' } values %ZONEMAP ],
+    Z1      => sub { return [ grep { $_ ne 'Ambiguous' } values %ZONEMAP ] },
     Z4      => $PARTS{timezone2},
     Z5      => qr/([+-]\d\d:\d\d)/o,
-    z1      => [ qr/[+-][0-9]{2,4}/, keys %ZONEMAP ],
-    z4      => [ DateTime::TimeZone->all_names ],
+    z1      => sub { return [ qr/[+-][0-9]{2,4}/, keys %ZONEMAP ] },
+    z4      => sub { return [ DateTime::TimeZone->all_names ] },
 );
 $PARSER{v1} = $PARSER{V1} = $PARSER{z1};
 $PARSER{v4} = $PARSER{V4} = $PARSER{z4};
@@ -898,6 +898,9 @@ sub _build_pattern {
                 if (defined $PARSER{$command.$count}) {
                     $rule = $PARSER{$command.$count};
                     $index = $count;
+                    # Lazy evaluate code
+                    $PARSER{$command.$count} = $rule = $rule->()
+                        if ref($rule) eq 'CODE';
                     last;
                 }
             }
