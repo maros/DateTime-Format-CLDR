@@ -350,7 +350,7 @@ sub new { ## no perlcritic(RequireArgUnpacking)
         if ($self->locale->can($DEFAULT_FORMAT)) {
             $args{pattern} = $self->locale->$DEFAULT_FORMAT;
         } else {
-            croak("Method '$DEFAULT_FORMAT' not available in ".ref($self->loclale));
+            croak("Method '$DEFAULT_FORMAT' not available in ".ref($self->locale));
         }
     }
 
