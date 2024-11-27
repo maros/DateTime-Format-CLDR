@@ -14,7 +14,7 @@ all_from        $from;
 readme_from     $from;
 
 # Specific dependencies
-requires        'DateTime'                  => '0.48';
+requires        'DateTime'                  => '1.05';
 requires        'Params::Validate'          => '0.76';
 requires        'DateTime::TimeZone'        => '0.95';
 requires        'DateTime::Locale'          => '0.42';
