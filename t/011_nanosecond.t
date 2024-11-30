@@ -18,7 +18,7 @@ explain("This test might fail on some plattforms due to unknown reasons");
 
 my $dtf1 = DateTime::Format::CLDR->new(
     locale      => 'en_US',
-    pattern     => 'dd.MM.yyy HH:mm:ss.SSSSSSSSSSSSSS',
+    pattern     => 'dd.MM.yyy HH:mm:ss.SSSSSSSSS',
 );
 
 my $dtf2 = DateTime::Format::CLDR->new(
